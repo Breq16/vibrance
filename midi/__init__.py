@@ -3,12 +3,12 @@ import atexit
 
 import mido
 
-from .. import controller
+from .. import *
 
 class NoUpdate:
     pass
 
-class Interface(controller.Controller):
+class Interface(Controller):
     def __init__(self, host):
         super().__init__(host)
 

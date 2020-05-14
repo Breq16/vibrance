@@ -1,4 +1,4 @@
-import .midi
+from . import *
 
 PALETTE = (
     "000000", # black
@@ -28,7 +28,7 @@ ZONEMAP = (
     (0, 0, 1, 0, 0, 1), # oct 7
 )
 
-api = midi_api.Interface("cloud.itsw.es")
+api = Interface("cloud.itsw.es")
 
 @api.onAny
 def test(msg):
