@@ -40,6 +40,7 @@ class Interface(Controller):
         return decorator
 
     def onOctave(self, octave):
+        octave += 2
         def decorator(func):
             self.onOctaveCallbacks[octave] = func
             return func

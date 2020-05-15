@@ -18,11 +18,11 @@ else:
 try:
     while True:
         note = int(input("Note> "))
-        velocity = int(input("Vel> "))
+        #velocity = int(input("Vel> "))
 
         msg = mido.Message("note_on")
         msg.note = note
-        msg.velocity = velocity
+        #msg.velocity = velocity
 
         if outport.closed:
             break

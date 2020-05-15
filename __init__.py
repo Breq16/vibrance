@@ -9,6 +9,9 @@ class Controller:
     def __init__(self, relay, password=None, enable_ssl=True):
         self.messages = {}
         self.relay = relay
+
+        self.delay = 0
+
         if enable_ssl:
             self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
             self.context.load_default_certs()
@@ -36,6 +39,7 @@ class Controller:
 
     def clear(self):
         self.messages = {}
+        self.delay = 0
 
     def add(self, port, color=None, **kwargs):
         if port not in self.messages:
@@ -50,9 +54,15 @@ class Controller:
 
         self.messages[port].append(message)
 
-    def fill(self, ports, color, **kwargs):
-        for port in ports:
-            self.add(port, color, **kwargs)
+    def color(self, ports, color):
+        if hasattr(ports, "__iter__"):
+            for port in ports:
+                self.add(port, color, delay=self.delay)
+        else:
+            self.add(ports, color, delay=self.delay)
+
+    def wait(self, sec):
+        self.delay += sec * 1000
 
     def write(self):
         timestamp = time.time()
