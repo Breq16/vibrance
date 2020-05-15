@@ -48,6 +48,7 @@ def test(msg):
                 api.add(i+9001, color)
             elif msg.velocity > 75:
                 api.add(i+9001, "000000")
+    api.update()
 
 @api.onTelemetry
 def onTelemetry(telemetry):

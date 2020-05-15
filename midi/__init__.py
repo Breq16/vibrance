@@ -21,34 +21,33 @@ class Interface(Controller):
 
         atexit.register(self.midi.close)
 
-        self.triggers = {}
+        self.onNoteCallbacks = {}
+        self.onOctaveCallbacks = {}
         self.onAnyCallback = None
         self.onTelemetryCallback = None
 
-    def _wrapUpdate(self, func, msg=None):
+    def update(self):
+        telemetry = self.write()
         self.clear()
-        if msg is not None:
-            result = func(msg)
-        else:
-            result = func(msg)
-        if not isinstance(result, NoUpdate):
-            telemetry = self.write()
-            if self.onTelemetryCallback:
-                self.onTelemetryCallback(telemetry)
+        if self.onTelemetryCallback:
+            self.onTelemetryCallback(telemetry)
+        return telemetry
 
-    def onTrigger(self, note):
+    def onNote(self, note):
         def decorator(func):
-            def wrapper():
-                self._wrapUpdate(func)
-            self.triggers[note] = wrapper
-            return wrapper
+            self.onNoteCallbacks[note] = func
+            return func
+        return decorator
+
+    def onOctave(self, octave):
+        def decorator(func):
+            self.onOctaveCallbacks[octave] = func
+            return func
         return decorator
 
     def onAny(self, func):
-        def wrapper(msg):
-            self._wrapUpdate(func, msg)
-        self.onAnyCallback = wrapper
-        return wrapper
+        self.onAnyCallback = func
+        return func
 
     def onTelemetry(self, func):
         self.onTelemetryCallback = func
@@ -57,8 +56,14 @@ class Interface(Controller):
     def run(self):
         for msg in self.midi:
             if msg.type == "note_on":
+                if msg.note in self.onNoteCallbacks:
+                    self.onNoteCallbacks[msg.note](msg)
+                    continue
+
+                octave = msg.note // 12
+                if octave in self.onOctaveCallbacks:
+                    self.onOctaveCallbacks[octave](msg)
+                    continue
+
                 if self.onAnyCallback:
                     self.onAnyCallback(msg)
-                else:
-                    if msg.note in self.triggers:
-                        self.triggers[msg.note]()
