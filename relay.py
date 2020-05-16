@@ -1,5 +1,4 @@
 import socket
-import select
 import subprocess
 import atexit
 import time
@@ -9,6 +8,7 @@ import traceback
 import ssl
 import os
 import pathlib
+import selectors
 from multiprocessing.dummy import Pool as ThreadPool
 
 psk = (pathlib.Path(__file__).parent / "secrets/psk.txt").resolve()
@@ -24,12 +24,16 @@ clients = []
 lastMessage = {}
 websockify_procs = []
 
+serverSelector = selectors.DefaultSelector()
+clientSelector = selectors.DefaultSelector()
+
 for port in ports:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("127.0.0.1", port+100))
     sock.listen(16)
     servers.append(sock)
+    serverSelector.register(sock, selectors.EVENT_READ)
 
 for port in ports:
     # Start the websockify
@@ -49,7 +53,13 @@ atexit.register(shutdownWebsockifys)
 
 # Dealing with clients
 def removeClient(client):
+    try:
+        clientSelector.unregister(client)
+    except KeyError:
+        pass
+
     client.close()
+
     try:
         clients.remove(client)
     except ValueError:
@@ -63,11 +73,13 @@ def handleIncomingLoop():
     global clients, servers, lastMessage
     print("Starting handle incoming connections thread")
     while True:
-        read_servers = select.select(servers, [], [], 0)[0]
-        for sock in read_servers:
+        events = serverSelector.select()
+        for key, mask in events:
             # New client
+            sock = key.fileobj
             port = sock.getsockname()[1]-100
             new_client, addr = sock.accept()
+            clientSelector.register(new_client, selectors.EVENT_READ)
             clients.append(new_client)
             lastMessage[new_client] = time.time()
             print(f"New client from {addr} on port {port}")
@@ -76,12 +88,10 @@ def handleAcknowledgeLoop():
     global clients, lastMessage
     print("Starting handle acknowledge thread")
     while True:
-        try:
-            read_clients = select.select(clients, [], [], 0)[0]
-        except OSError:
-            continue
-        for sock in read_clients:
+        events = clientSelector.select()
+        for key, mask in events:
             # New message from client
+            sock = key.fileobj
             try:
                 data = sock.recv(1024)
                 if data:
@@ -137,9 +147,7 @@ def broadcastToClient(client):
         return # Selective Update
     try:
         client.send(json.dumps(messages[str(port)]).encode("utf-8"))
-    except Exception as e:
-        print(f"Failed send to {port} client")
-        traceback.print_exc()
+    except OSError:
         removeClient(client)
 
 def broadcastToClients():
@@ -163,9 +171,6 @@ else:
     cserver_sock.bind(("0.0.0.0", 9100))
     cserver_sock.listen(16)
 
-cclients = []
-cclients_awaiting_auth = []
-
 if os.path.exists("secrets/psk.txt"):
     with open("secrets/psk.txt") as f:
         PASSWORD = f.read().rstrip("\r\n")
@@ -176,92 +181,79 @@ else:
     print("(not doing this allows anyone to use this)")
     print("Using default password `password`...")
 
+class controller_type:
+    SERVER = 0 # server socket
+    WAITING = 1 # awaiting authentication
+    CLIENT = 2 # connected client
+
+commandServerSelector = selectors.DefaultSelector()
+commandServerSelector.register(cserver_sock, selectors.EVENT_READ, controller_type.SERVER)
+
+def removeCommandClient(client):
+    commandServerSelector.unregister(client)
+    try:
+        client.close()
+    except OSError:
+        pass
+
 def runCommandServer():
     global messages
     while True:
-        # New Clients
-        read_server = select.select([cserver_sock], [], [], 0)[0]
-        if cserver_sock in read_server:
-            new_client, addr = cserver_sock.accept()
-            cclients_awaiting_auth.append(new_client)
-            print(f"New command client from {addr} awaiting authentication")
+        events = commandServerSelector.select()
 
-        # Client Authentication
-        read_clients_awaiting = select.select(cclients_awaiting_auth, [], [], 0)[0]
-        for client in read_clients_awaiting:
-            print("New data from client awaiting auth")
-            try:
-                data = client.recv(2**18)
-                if len(data) == 0:
-                    print("Socket closed")
-                    cclients_awaiting_auth.remove(client)
-                    try:
-                        client.close()
-                    except Exception:
-                        pass
-                    continue
-            except Exception as e:
-                print("Error reading")
-                traceback.print_exc()
-                cclients_awaiting_auth.remove(client)
+        for key, mask in events:
+            client = key.fileobj
+            type = key.data
+
+            if type == controller_type.SERVER:
+                # New client
+                new_client, addr = cserver_sock.accept()
+                commandServerSelector.register(new_client, selectors.EVENT_READ, controller_type.WAITING)
+
+            elif type == controller_type.WAITING:
+                # Client Authentication
                 try:
-                    client.close()
-                except Exception:
-                    pass
-                continue
-            try:
-                message = data.decode()
-            except Exception:
-                print("Unable to decode message")
-            else:
-                if message == PASSWORD:
-                    print("Client authenticated")
-                    cclients.append(client)
-                    cclients_awaiting_auth.remove(client)
+                    data = client.recv(1024)
+
+                except OSError: # Client is dead
+                    removeCommandClient(client)
+                    continue
+
+                if len(data) == 0: # Client is disconnected
+                    removeCommandClient(client)
+                    continue
+
+                msg = data.decode("utf-8", "ignore")
+
+                if msg == PASSWORD:
+                    commandServerSelector.modify(client, selectors.EVENT_READ, controller_type.CLIENT)
                     client.send(b"OK")
                 else:
-                    print("Authentication failed")
-                    cclients_awaiting_auth.remove(client)
-                    try:
-                        client.close()
-                    except Exception:
-                        pass
-
-        # Authenticated Clients
-        read_clients = select.select(cclients, [], [], 0)[0]
-        for client in read_clients:
-            print("New data")
-            try:
-                data = client.recv(2**18)
-                if len(data) == 0:
-                    print("Socket closed")
-                    cclients.remove(client)
-                    try:
-                        client.close()
-                    except Exception:
-                        pass
+                    removeCommandClient(client)
                     continue
-            except Exception as e:
-                print("Error reading from command client, removing")
-                traceback.print_exc()
-                cclients.remove(client)
+
+            elif type == controller_type.CLIENT:
                 try:
-                    client.close()
-                except Exception:
-                    pass
-                continue
-            try:
-                line = data.decode().split("\n")[0]
-                messages = json.loads(line)
-            except Exception as e:
-                print("Unable to decode message")
-                traceback.print_exc()
-            else:
-                print(messages)
+                    data = client.recv(2**18)
+
+                except OSError: # Client is dead
+                    removeCommandClient(client)
+                    continue
+
+                if len(data) == 0: # Client is disconnected
+                    removeCommandClient(client)
+                    continue
+
+                try:
+                    obj = json.loads(data.decode("utf-8", "ignore").split("\n")[0])
+                except json.JSONDecodeError:
+                    removeCommandClient(client)
+                    continue
+
+                messages = obj
+
                 latency = broadcastToClients()
                 client.send(json.dumps({"clients":len(clients), "latency":latency}).encode("utf-8"))
-
-
 
 runBackgroundProcesses()
 
