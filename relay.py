@@ -41,10 +41,14 @@ for port in ports:
         websockify_procs.append(subprocess.Popen(["websockify", str(port),
                                                   f"localhost:{port+100}",
                                                   f"--cert={cert}",
-                                                  f"--key={key}"], stdout=subprocess.DEVNULL))
+                                                  f"--key={key}"],
+                                                  stdout=subprocess.DEVNULL,
+                                                  stderr=subprocess.DEVNULL))
     else:
         websockify_procs.append(subprocess.Popen(["websockify", str(port),
-                                                  f"localhost:{port+100}"], stdout=subprocess.DEVNULL))
+                                                  f"localhost:{port+100}"],
+                                                  stdout=subprocess.DEVNULL,
+                                                  stderr=subprocess.DEVNULL))
 
 def shutdownWebsockifys():
     for proc in websockify_procs:
