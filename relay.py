@@ -41,10 +41,10 @@ for port in ports:
         websockify_procs.append(subprocess.Popen(["websockify", str(port),
                                                   f"localhost:{port+100}",
                                                   f"--cert={cert}",
-                                                  f"--key={key}"]))
+                                                  f"--key={key}"], stdout=subprocess.DEVNULL))
     else:
         websockify_procs.append(subprocess.Popen(["websockify", str(port),
-                                                  f"localhost:{port+100}"]))
+                                                  f"localhost:{port+100}"], stdout=subprocess.DEVNULL))
 
 def shutdownWebsockifys():
     for proc in websockify_procs:
@@ -82,7 +82,6 @@ def handleIncomingLoop():
             clientSelector.register(new_client, selectors.EVENT_READ)
             clients.append(new_client)
             lastMessage[new_client] = time.time()
-            print(f"New client from {addr} on port {port}")
 
 def handleAcknowledgeLoop():
     global clients, lastMessage
@@ -98,7 +97,6 @@ def handleAcknowledgeLoop():
                     # print(f"Received {message} from {sock.getpeername()}")
                     lastMessage[sock] = time.time()
             except OSError:
-                print("Error receiving message, terminating client")
                 removeClient(sock)
 
 def handleCheckAliveLoop():
@@ -108,10 +106,6 @@ def handleCheckAliveLoop():
         for client in clients:
             if time.time() - lastMessage[client] > 10:
                 removeClient(client)
-                try:
-                    print(f"Terminating dead client {client.getpeername()}")
-                except:
-                    print("Terminating dead client")
         time.sleep(10)
 
 def wrapLoop(loopfunc):
