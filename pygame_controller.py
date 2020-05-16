@@ -130,6 +130,7 @@ while running:
         ctrl.clear()
         for port in enabled.keys():
             ctrl.add(port, color if enabled[port] else "000")
+            ctrl.add(port, useless=("X"*1000))
         ctrl.write()
         updateNeeded = False
 

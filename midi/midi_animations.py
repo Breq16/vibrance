@@ -85,4 +85,8 @@ def clear(msg):
     api.color(PORTS, "000")
     api.update()
 
+@api.onTelemetry
+def onTelemetry(telemetry):
+    print(telemetry)
+
 api.run()
