@@ -1,6 +1,7 @@
 import pygame
 import time
-from . import *
+
+import controller
 
 PALETTE = (
     "000000", # black
@@ -18,7 +19,8 @@ PALETTE = (
 )
 
 
-ctrl = Controller("cloud.itsw.es")
+ctrl = controller.Controller()
+ctrl.connect("cloud.itsw.es")
 
 pygame.init()
 

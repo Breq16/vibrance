@@ -1,9 +1,10 @@
 import math
 import time
 
-from . import *
+import controller
 
-ctrl = Controller("cloud.itsw.es")
+ctrl = controller.Controller()
+ctrl.connect("cloud.itsw.es")
 
 def getColor(radians):
     red = 0x80 + int(0x79*math.sin(radians))

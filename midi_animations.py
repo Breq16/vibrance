@@ -19,7 +19,8 @@ PALETTE = (
 
 PORTS = list(range(9001, 9007))
 
-api = Interface("cloud.itsw.es")
+api = midi.Interface()
+api.connect("cloud.itsw.es")
 
 @api.onOctave(-2)
 def cycle(msg):

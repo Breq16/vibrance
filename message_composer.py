@@ -4,7 +4,7 @@ import os
 import sys
 import atexit
 
-from . import *
+import controller
 
 histfile = os.path.join(os.path.expanduser("~"), ".vibrance_history")
 
@@ -20,7 +20,8 @@ if len(sys.argv) < 2:
     print("Usage: message_composer.py [relay address]")
     sys.exit()
 
-ctrl = Controller(sys.argv[1])
+ctrl = controller.Controller()
+ctrl.connect(sys.argv[1])
 
 while True:
     i = input("Messages> ")

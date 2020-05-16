@@ -6,12 +6,12 @@ import ssl
 import os
 
 class Controller:
-    def __init__(self, relay, password=None, enable_ssl=True):
+    def __init__(self):
         self.messages = {}
-        self.relay = relay
 
         self.delay = 0
 
+    def connect(self, relay, password=None, enable_ssl=True):
         if enable_ssl:
             self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
             self.context.load_default_certs()

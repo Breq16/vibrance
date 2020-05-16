@@ -3,14 +3,14 @@ import atexit
 
 import mido
 
-from .. import *
+import controller
 
 class NoUpdate:
     pass
 
-class Interface(Controller):
-    def __init__(self, host):
-        super().__init__(host)
+class Interface(controller.Controller):
+    def __init__(self):
+        super().__init__()
 
         if os.name == "posix":
             self.midi = mido.open_input("vibrance", virtual=True)
