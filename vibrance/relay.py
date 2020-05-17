@@ -161,7 +161,7 @@ def broadcastToClients():
 if enable_ssl:
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_default_certs()
-    context.load_cert_chain(cert, key)
+    context.load_cert_chain(args.cert, args.key)
     cserver_sock_unwrapped = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     cserver_sock_unwrapped.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     cserver_sock_unwrapped.bind(("0.0.0.0", 9100))
