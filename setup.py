@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="vibrance",
-    version="0.0.1",
+    version="0.0.2",
     author="Wesley Chalmers",
     author_email="wesleyjchalmers@gmail.com",
     description="Crowd-based concert lighting system",
