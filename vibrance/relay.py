@@ -7,7 +7,6 @@ import threading
 import traceback
 import ssl
 import os
-import pathlib
 import selectors
 import argparse
 from multiprocessing.dummy import Pool as ThreadPool
