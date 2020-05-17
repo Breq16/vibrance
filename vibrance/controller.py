@@ -36,7 +36,6 @@ class Controller:
 
     def clear(self):
         self.messages = {}
-        self.delay = 0
 
     def add(self, port, color=None, **kwargs):
         if port not in self.messages:
