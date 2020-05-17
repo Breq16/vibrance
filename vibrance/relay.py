@@ -9,13 +9,17 @@ import ssl
 import os
 import pathlib
 import selectors
+import argparse
 from multiprocessing.dummy import Pool as ThreadPool
 
-psk = (pathlib.Path(__file__).parent / "secrets/psk.txt").resolve()
-cert = (pathlib.Path(__file__).parent / "secrets/fullchain.pem").resolve()
-key  = (pathlib.Path(__file__).parent / "secrets/privkey.pem").resolve()
+parser = argparse.ArgumentParser()
+parser.add_argument("--psk", help="Optional password to protect the command server.")
+parser.add_argument("--cert", help="SSL certificate for secure WebSockets.")
+parser.add_argument("--key", help="SSL private key for secure WebSockets.")
+args = parser.parse_args()
 
-enable_ssl = True
+if args.cert is not None and args.key is not None:
+    enable_ssl = True
 
 ports = list(range(9001, 9007))
 messages = {}
@@ -40,8 +44,8 @@ for port in ports:
     if enable_ssl:
         websockify_procs.append(subprocess.Popen(["websockify", str(port),
                                                   f"localhost:{port+100}",
-                                                  f"--cert={cert}",
-                                                  f"--key={key}"],
+                                                  f"--cert={args.cert}",
+                                                  f"--key={args.key}"],
                                                   stdout=subprocess.DEVNULL,
                                                   stderr=subprocess.DEVNULL))
     else:
@@ -169,16 +173,6 @@ else:
     cserver_sock.bind(("0.0.0.0", 9100))
     cserver_sock.listen(16)
 
-if os.path.exists("secrets/psk.txt"):
-    with open("secrets/psk.txt") as f:
-        PASSWORD = f.read().rstrip("\r\n")
-else:
-    print("Warning: No password set")
-    print("Create the file ./secrets/psk.txt")
-    print("with the password for the controller interface")
-    print("(not doing this allows anyone to use this)")
-    print("Using default password `password`...")
-
 class controller_type:
     SERVER = 0 # server socket
     WAITING = 1 # awaiting authentication
@@ -206,7 +200,10 @@ def runCommandServer():
             if type == controller_type.SERVER:
                 # New client
                 new_client, addr = cserver_sock.accept()
-                commandServerSelector.register(new_client, selectors.EVENT_READ, controller_type.WAITING)
+                if args.psk is not None:
+                    commandServerSelector.register(new_client, selectors.EVENT_READ, controller_type.WAITING)
+                else:
+                    commandServerSelector.register(new_client, selectors.EVENT_READ, controller_type.CLIENT)
 
             elif type == controller_type.WAITING:
                 # Client Authentication
@@ -223,7 +220,7 @@ def runCommandServer():
 
                 msg = data.decode("utf-8", "ignore")
 
-                if msg == PASSWORD:
+                if msg == args.psk:
                     commandServerSelector.modify(client, selectors.EVENT_READ, controller_type.CLIENT)
                     client.send(b"OK")
                 else:

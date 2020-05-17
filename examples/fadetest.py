@@ -4,7 +4,7 @@ import time
 import vibrance
 
 ctrl = vibrance.Controller()
-ctrl.connect("cloud.itsw.es")
+ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
 def getColor(radians):
     red = 0x80 + int(0x79*math.sin(radians))

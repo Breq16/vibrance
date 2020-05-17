@@ -56,7 +56,7 @@ def onTelemetry(telemetry):
 
 if __name__ == "__main__":
     ctrl = vibrance.Controller()
-    ctrl.connect("cloud.itsw.es")
+    ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
     min = vibrance.midi.MidiInput()
 

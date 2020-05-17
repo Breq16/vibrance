@@ -1,4 +1,3 @@
-import pathlib
 import socket
 import json
 import time
@@ -18,13 +17,6 @@ class Controller:
         else:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((relay, 9100))
-
-        # If no password is specified, default to the one in secrets/psk.txt
-        if not password:
-            password_path = (pathlib.Path(__file__).parent / "secrets/psk.txt").resolve()
-            if os.path.exists(password_path):
-                with open(password_path) as f:
-                    password = f.read().rstrip("\r\n")
 
         if password:
             self.socket.send(password.encode("utf-8"))

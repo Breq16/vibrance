@@ -7,7 +7,7 @@ import vibrance.midi
 module_names = ["simple", "animations"]
 
 ctrl = vibrance.Controller()
-ctrl.connect("cloud.itsw.es")
+ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
 mdin = vibrance.midi.MidiInput()
 
