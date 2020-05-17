@@ -4,7 +4,7 @@ import threading
 import controller
 import midi
 
-module_names = ["midi_simple", "midi_animations"]
+module_names = ["simple", "animations"]
 
 ctrl = controller.Controller()
 ctrl.connect("cloud.itsw.es")
