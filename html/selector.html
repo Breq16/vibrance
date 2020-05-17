@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>VIBRANCE | Select Your Position</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+            font-family: "Lucida Console", Monaco, monospace;
+            background-color: #000;
+            color: #FFF;
+        }
+
+        .topbar, h1 {
+            width: 100%;
+            text-align: center;
+            height: 20%;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .selector, table {
+            width: 100%;
+            height: 75%;
+            text-align: center;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .credit {
+            width: 100%;
+            height: 5%;
+            text-align: center;
+            margin: 0px;
+            font-size: 12px;
+            vertical-align: bottom;
+            color: #666;
+        }
+
+        td {
+            font-size: 40px;
+            vertical-align: middle;
+        }
+
+        a {
+            color: #0F0;
+        }
+
+        .disabled {
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="topbar">
+        <br><br>
+        <h1>
+            Where in the room are you standing?
+        </h1>
+    </div>
+    <div class="selector">
+        <table>
+            <tr>
+                <td colspan="3">
+                    [Stage]
+                </td>
+            </tr>
+            <tr>
+                <td><a href="app.html?host=cloud.itsw.es&port=9001">Left Front</a></td>
+                <td><a href="app.html?host=cloud.itsw.es&port=9002">Center Front</a></td>
+                <td><a href="app.html?host=cloud.itsw.es&port=9003">Right Front</a></td>
+            </tr>
+            <tr>
+                <td><a href="app.html?host=cloud.itsw.es&port=9004">Left Rear</a></td>
+                <td><a href="app.html?host=cloud.itsw.es&port=9005">Center Rear</a></td>
+                <td><a href="app.html?host=cloud.itsw.es&port=9006">Right Rear</a></td>
+            </tr>
+        </table>
+    </div>
+    <div class="credit">
+        <span class="small">made with &lt;3 by <a href="https://itsw.es/" target="_blank" rel="noopener noreferrer">breq</a></span>
+    </div>
+</body>
+
+</html>
