@@ -1,7 +1,7 @@
 import pygame
 import time
 
-import controller
+import vibrance
 
 PALETTE = (
     "000000", # black
@@ -19,7 +19,7 @@ PALETTE = (
 )
 
 
-ctrl = controller.Controller()
+ctrl = vibrance.Controller()
 ctrl.connect("cloud.itsw.es")
 
 pygame.init()

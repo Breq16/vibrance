@@ -1,4 +1,5 @@
-import midi
+import vibrance
+import vibrance.midi
 
 PALETTE = (
     "000000", # black
@@ -28,7 +29,7 @@ ZONEMAP = (
     (0, 0, 1, 0, 0, 1), # oct 7
 )
 
-api = midi.MidiInterface()
+api = vibrance.midi.MidiInterface()
 
 @api.onAny
 def test(msg):
@@ -54,11 +55,9 @@ def onTelemetry(telemetry):
     print(telemetry)
 
 if __name__ == "__main__":
-    import controller
-
-    ctrl = controller.Controller()
+    ctrl = vibrance.Controller()
     ctrl.connect("cloud.itsw.es")
 
-    min = midi.MidiInput()
+    min = vibrance.midi.MidiInput()
 
     api.run(min, ctrl)

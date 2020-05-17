@@ -3,7 +3,7 @@ import atexit
 
 import mido
 
-import interface
+from . import interface
 
 class MidiInput:
     def __init__(self):

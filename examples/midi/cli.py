@@ -1,15 +1,15 @@
 import importlib
 import threading
 
-import controller
-import midi
+import vibrance
+import vibrance.midi
 
 module_names = ["simple", "animations"]
 
-ctrl = controller.Controller()
+ctrl = vibrance.Controller()
 ctrl.connect("cloud.itsw.es")
 
-mdin = midi.MidiInput()
+mdin = vibrance.midi.MidiInput()
 
 modules = {}
 for name in module_names:

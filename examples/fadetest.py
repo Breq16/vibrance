@@ -1,9 +1,9 @@
 import math
 import time
 
-import controller
+import vibrance
 
-ctrl = controller.Controller()
+ctrl = vibrance.Controller()
 ctrl.connect("cloud.itsw.es")
 
 def getColor(radians):
