@@ -1,5 +1,6 @@
 import importlib
 import threading
+import sys
 
 import vibrance
 import vibrance.midi

@@ -1,5 +1,7 @@
-import pygame
 import time
+import sys
+
+import pygame
 
 import vibrance
 
