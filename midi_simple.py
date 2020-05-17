@@ -28,7 +28,7 @@ ZONEMAP = (
     (0, 0, 1, 0, 0, 1), # oct 7
 )
 
-api = midi.Interface()
+api = midi.MidiInterface()
 
 @api.onAny
 def test(msg):
@@ -55,11 +55,10 @@ def onTelemetry(telemetry):
 
 if __name__ == "__main__":
     import controller
-    import midi_input
 
     ctrl = controller.Controller()
     ctrl.connect("cloud.itsw.es")
 
-    min = midi_input.MidiInput()
+    min = midi.MidiInput()
 
     api.run(min, ctrl)

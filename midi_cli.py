@@ -1,16 +1,15 @@
-import controller
-import midi
-import midi_input
-
 import importlib
 import threading
+
+import controller
+import midi
 
 module_names = ["midi_simple", "midi_animations"]
 
 ctrl = controller.Controller()
 ctrl.connect("cloud.itsw.es")
 
-mdin = midi_input.MidiInput()
+mdin = midi.MidiInput()
 
 modules = {}
 for name in module_names:

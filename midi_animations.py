@@ -19,7 +19,7 @@ PALETTE = (
 
 PORTS = list(range(9001, 9007))
 
-api = midi.Interface()
+api = midi.MidiInterface()
 
 @api.onOctave(-2)
 def cycle(msg):
@@ -86,11 +86,10 @@ def onTelemetry(telemetry):
 
 if __name__ == "__main__":
     import controller
-    import midi_input
 
     ctrl = controller.Controller()
     ctrl.connect("cloud.itsw.es")
 
-    min = midi_input.MidiInput()
+    min = midi.MidiInput()
 
     api.run(min, ctrl)
