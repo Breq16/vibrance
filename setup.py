@@ -23,7 +23,8 @@ setuptools.setup(
     python_requires='>=3.6',
     install_requires=[],
     extras_require={
-        "midi":["mido"],
-        "relay":["websockify"],
+        "midi": ["mido"],
+        "relay": ["websockify"],
+        "uart": ["pyserial"],
     }
 )

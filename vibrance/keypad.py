@@ -37,7 +37,6 @@ class KeypadInterface(interface.Interface):
         self.onSymbolCallback = None
         self.onSpecialCallback = None
         self.onAnyCallback = None
-        self.onTelemetryCallback = None
 
     def onKey(self, key):
         def decorator(func):

@@ -28,7 +28,6 @@ class MidiInterface(interface.Interface):
         self.onNoteCallbacks = {}
         self.onOctaveCallbacks = {}
         self.onAnyCallback = None
-        self.onTelemetryCallback = None
 
     def onNote(self, note):
         def decorator(func):
