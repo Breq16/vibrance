@@ -6,13 +6,12 @@ import json
 import threading
 import traceback
 import ssl
-import os
 import selectors
 import argparse
 from multiprocessing.dummy import Pool as ThreadPool
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--psk", help="Optional password to protect the command server.")
+parser.add_argument("--psk", help="Optional password for the command server.")
 parser.add_argument("--cert", help="SSL certificate for secure WebSockets.")
 parser.add_argument("--key", help="SSL private key for secure WebSockets.")
 args = parser.parse_args()
@@ -45,18 +44,22 @@ for port in ports:
                                                   f"localhost:{port+100}",
                                                   f"--cert={args.cert}",
                                                   f"--key={args.key}"],
-                                                  stdout=subprocess.DEVNULL,
-                                                  stderr=subprocess.DEVNULL))
+                                                 stdout=subprocess.DEVNULL,
+                                                 stderr=subprocess.DEVNULL))
     else:
         websockify_procs.append(subprocess.Popen(["websockify", str(port),
                                                   f"localhost:{port+100}"],
-                                                  stdout=subprocess.DEVNULL,
-                                                  stderr=subprocess.DEVNULL))
+                                                 stdout=subprocess.DEVNULL,
+                                                 stderr=subprocess.DEVNULL))
+
 
 def shutdownWebsockifys():
     for proc in websockify_procs:
         proc.terminate()
+
+
 atexit.register(shutdownWebsockifys)
+
 
 # Dealing with clients
 def removeClient(client):
@@ -76,6 +79,7 @@ def removeClient(client):
     except KeyError:
         pass
 
+
 def handleIncomingLoop():
     global clients, servers, lastMessage
     print("Starting handle incoming connections thread")
@@ -84,11 +88,11 @@ def handleIncomingLoop():
         for key, mask in events:
             # New client
             sock = key.fileobj
-            port = sock.getsockname()[1]-100
             new_client, addr = sock.accept()
             clientSelector.register(new_client, selectors.EVENT_READ)
             clients.append(new_client)
             lastMessage[new_client] = time.time()
+
 
 def handleAcknowledgeLoop():
     global clients, lastMessage
@@ -106,6 +110,7 @@ def handleAcknowledgeLoop():
             except OSError:
                 removeClient(sock)
 
+
 def handleCheckAliveLoop():
     global clients, lastMessage
     print("Starting handle check alive thread")
@@ -115,17 +120,19 @@ def handleCheckAliveLoop():
                 removeClient(client)
         time.sleep(10)
 
+
 def wrapLoop(loopfunc):
     def wrapped():
         while True:
             try:
                 loopfunc()
-            except BaseException as e:
+            except BaseException:
                 print(f"Exception in thread {loopfunc}")
                 traceback.print_exc()
             else:
                 print(f"Thread {loopfunc} exited, restarting")
     return wrapped
+
 
 def runBackgroundProcesses():
     handleIncomingProcess = threading.Thread(
@@ -139,46 +146,56 @@ def runBackgroundProcesses():
     handleAcknowledgeProcess.start()
     handleCheckAliveProcess.start()
 
+
 broadcastPool = ThreadPool(32)
+
 
 def broadcastToClient(client):
     global messages
     port = client.getsockname()[1]-100
     if str(port) not in messages:
-        return # Selective Update
+        return  # Selective Update
     try:
         client.send(json.dumps(messages[str(port)]).encode("utf-8"))
     except OSError:
         removeClient(client)
+
 
 def broadcastToClients():
     ts = time.time()
     broadcastPool.map(broadcastToClient, clients)
     return int((time.time()-ts)*1000)
 
-### Command Server
+
+# Command Server
 if enable_ssl:
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_default_certs()
     context.load_cert_chain(args.cert, args.key)
     cserver_sock_unwrapped = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    cserver_sock_unwrapped.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    cserver_sock_unwrapped.setsockopt(socket.SOL_SOCKET,
+                                      socket.SO_REUSEADDR, 1)
     cserver_sock_unwrapped.bind(("0.0.0.0", 9100))
     cserver_sock_unwrapped.listen(16)
-    cserver_sock = context.wrap_socket(cserver_sock_unwrapped, server_side=True)
+    cserver_sock = context.wrap_socket(cserver_sock_unwrapped,
+                                       server_side=True)
 else:
     cserver_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     cserver_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     cserver_sock.bind(("0.0.0.0", 9100))
     cserver_sock.listen(16)
 
+
 class controller_type:
-    SERVER = 0 # server socket
-    WAITING = 1 # awaiting authentication
-    CLIENT = 2 # connected client
+    SERVER = 0  # server socket
+    WAITING = 1  # awaiting authentication
+    CLIENT = 2  # connected client
+
 
 commandServerSelector = selectors.DefaultSelector()
-commandServerSelector.register(cserver_sock, selectors.EVENT_READ, controller_type.SERVER)
+commandServerSelector.register(cserver_sock, selectors.EVENT_READ,
+                               controller_type.SERVER)
+
 
 def removeCommandClient(client):
     commandServerSelector.unregister(client)
@@ -186,6 +203,7 @@ def removeCommandClient(client):
         client.close()
     except OSError:
         pass
+
 
 def runCommandServer():
     global messages
@@ -200,27 +218,33 @@ def runCommandServer():
                 # New client
                 new_client, addr = cserver_sock.accept()
                 if args.psk is not None:
-                    commandServerSelector.register(new_client, selectors.EVENT_READ, controller_type.WAITING)
+                    commandServerSelector.register(new_client,
+                                                   selectors.EVENT_READ,
+                                                   controller_type.WAITING)
                 else:
-                    commandServerSelector.register(new_client, selectors.EVENT_READ, controller_type.CLIENT)
+                    commandServerSelector.register(new_client,
+                                                   selectors.EVENT_READ,
+                                                   controller_type.CLIENT)
+                continue
 
-            elif type == controller_type.WAITING:
+            # New message from client
+
+            try:
+                data = client.recv(2**18)
+            except OSError:
+                removeCommandClient(client)
+                continue
+
+            if len(data) == 0:
+                removeCommandClient(client)
+
+            msg = data.decode("utf-8", "ignore")
+
+            if type == controller_type.WAITING:
                 # Client Authentication
-                try:
-                    data = client.recv(1024)
-
-                except OSError: # Client is dead
-                    removeCommandClient(client)
-                    continue
-
-                if len(data) == 0: # Client is disconnected
-                    removeCommandClient(client)
-                    continue
-
-                msg = data.decode("utf-8", "ignore")
-
                 if msg == args.psk:
-                    commandServerSelector.modify(client, selectors.EVENT_READ, controller_type.CLIENT)
+                    commandServerSelector.modify(client, selectors.EVENT_READ,
+                                                 controller_type.CLIENT)
                     client.send(b"OK")
                 else:
                     removeCommandClient(client)
@@ -228,18 +252,7 @@ def runCommandServer():
 
             elif type == controller_type.CLIENT:
                 try:
-                    data = client.recv(2**18)
-
-                except OSError: # Client is dead
-                    removeCommandClient(client)
-                    continue
-
-                if len(data) == 0: # Client is disconnected
-                    removeCommandClient(client)
-                    continue
-
-                try:
-                    obj = json.loads(data.decode("utf-8", "ignore").split("\n")[0])
+                    obj = json.loads(msg.split("\n")[0])
                 except json.JSONDecodeError:
                     removeCommandClient(client)
                     continue
@@ -247,13 +260,15 @@ def runCommandServer():
                 messages = obj
 
                 latency = broadcastToClients()
-                client.send(json.dumps({"clients":len(clients), "latency":latency}).encode("utf-8"))
+                telemetry = {"clients": len(clients), "latency": latency}
+                client.send(json.dumps(telemetry).encode("utf-8"))
+
 
 runBackgroundProcesses()
 
 while True:
     try:
         runCommandServer()
-    except Exception as e:
+    except Exception:
         print("Error in Command Server:")
         traceback.print_exc()

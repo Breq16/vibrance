@@ -5,6 +5,7 @@ import mido
 
 from . import interface
 
+
 class MidiInput:
     def __init__(self):
         if os.name == "posix":
@@ -18,6 +19,7 @@ class MidiInput:
 
     def __iter__(self):
         return iter(self.midi)
+
 
 class MidiInterface(interface.Interface):
     def __init__(self):
@@ -36,6 +38,7 @@ class MidiInterface(interface.Interface):
 
     def onOctave(self, octave):
         octave += 2
+
         def decorator(func):
             self.onOctaveCallbacks[octave] = func
             return func

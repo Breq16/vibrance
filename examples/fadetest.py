@@ -7,11 +7,13 @@ import vibrance
 ctrl = vibrance.Controller()
 ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
+
 def getColor(radians):
     red = 0x80 + int(0x79*math.sin(radians))
     green = 0x80 + int(0x79*math.sin(radians+math.pi*2/3))
     blue = 0x80 + int(0x79*math.sin(radians+math.pi*4/3))
     return f"{format(red, '02x')}{format(green, '02x')}{format(blue, '02x')}"
+
 
 frame = 0
 while True:
