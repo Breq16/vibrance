@@ -20,11 +20,17 @@ if len(sys.argv) < 2:
     print("Usage: message_composer.py [relay address]")
     sys.exit()
 
+api = vibrance.Interface()
+
 ctrl = vibrance.Controller()
 ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
+@api.onTelemetry
+def onTelemetry(telemetry):
+    print(telemetry)
+
 while True:
     i = input("Messages> ")
-    ctrl.clear()
-    ctrl.messages = json.loads(i)
-    print(ctrl.write())
+    api.clear()
+    api.messages = json.loads(i)
+    api.update(ctrl)

@@ -23,6 +23,8 @@ PALETTE = (
 ctrl = vibrance.Controller()
 ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
+api = vibrance.Interface()
+
 pygame.init()
 
 screen = pygame.display.set_mode((1000, 500))
@@ -41,33 +43,33 @@ updateNeeded = True
 def setEnabled(key, state):
     global enabled
     if key in (pygame.K_KP1, ord('1')):
-        enabled[9001] = True
-        enabled[9004] = True
+        enabled[9001] = state
+        enabled[9004] = state
     elif key in (pygame.K_KP2, ord('2')):
-        enabled[9002] = True
-        enabled[9005] = True
+        enabled[9002] = state
+        enabled[9005] = state
     elif key in (pygame.K_KP3, ord('3')):
-        enabled[9003] = True
-        enabled[9006] = True
+        enabled[9003] = state
+        enabled[9006] = state
     elif key in (pygame.K_KP4, ord('4')):
-        enabled[9004] = True
+        enabled[9004] = state
     elif key in (pygame.K_KP5, ord('5')):
-        enabled[9005] = True
+        enabled[9005] = state
     elif key in (pygame.K_KP6, ord('6')):
-        enabled[9006] = True
+        enabled[9006] = state
     elif key in (pygame.K_KP7, ord('7')):
-        enabled[9001] = True
+        enabled[9001] = state
     elif key in (pygame.K_KP8, ord('8')):
-        enabled[9002] = True
+        enabled[9002] = state
     elif key in (pygame.K_KP9, ord('9')):
-        enabled[9003] = True
+        enabled[9003] = state
     elif key in (pygame.K_KP0, ord('0')):
-        enabled[9001] = True
-        enabled[9002] = True
-        enabled[9003] = True
-        enabled[9004] = True
-        enabled[9005] = True
-        enabled[9006] = True
+        enabled[9001] = state
+        enabled[9002] = state
+        enabled[9003] = state
+        enabled[9004] = state
+        enabled[9005] = state
+        enabled[9006] = state
 
 
 def changeColor(key):
@@ -115,10 +117,10 @@ while running:
             updateNeeded = True
 
     if updateNeeded:
-        ctrl.clear()
+        api.clear()
         for port in enabled.keys():
-            ctrl.add(port, color if enabled[port] else "000")
-        ctrl.write()
+            api.color(port, color if enabled[port] else "000")
+        api.update(ctrl)
         updateNeeded = False
 
     pygame.draw.rect(screen, pygame.Color("#"+color), (0, 0, 1000, 500))

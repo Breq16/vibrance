@@ -35,8 +35,7 @@ class Interface:
         return func
 
     def update(self, ctrl):
-        ctrl.messages = self.messages
-        telemetry = ctrl.write()
+        telemetry = ctrl.write(self.messages)
         if self.onTelemetryCallback:
             self.onTelemetryCallback(telemetry)
         self.clear()

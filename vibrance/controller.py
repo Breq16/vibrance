@@ -6,7 +6,7 @@ import ssl
 
 class Controller:
     def __init__(self):
-        self.messages = {}
+        pass
 
     def connect(self, relay, password=None, enable_ssl=True):
         if enable_ssl:
@@ -28,26 +28,9 @@ class Controller:
             else:
                 raise ValueError("authentication failed")
 
-    def clear(self):
-        self.messages = {}
-
-    def add(self, port, color=None, **kwargs):
-        if port not in self.messages:
-            self.messages[port] = []
-
-        message = {}
-        if color is not None:
-            message["color"] = color
-
-        for key, val in kwargs.items():
-            message[key] = val
-
-        self.messages[port].append(message)
-
-    def write(self):
+    def write(self, messages):
         timestamp = time.time()
-        self.socket.send((json.dumps(self.messages)+"\n").encode("utf-8"))
-        self.messages = {}
+        self.socket.send((json.dumps(messages)+"\n").encode("utf-8"))
         stats = {}
         stats["server"] = json.loads(self.socket.recv(1024).decode("utf-8"))
         stats["controller"] = {"latency": int((time.time()-timestamp)*1000)}
