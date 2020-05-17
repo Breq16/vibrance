@@ -48,10 +48,6 @@ class MidiInterface(interface.Interface):
         self.onAnyCallback = func
         return func
 
-    def onTelemetry(self, func):
-        self.onTelemetryCallback = func
-        return func
-
     def run(self, midi, ctrl):
         for msg in midi:
             if msg.type == "note_on":

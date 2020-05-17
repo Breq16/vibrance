@@ -1,6 +1,7 @@
 class Interface:
     def __init__(self):
         self.clear()
+        self.onTelemetryCallback = None
 
     def clear(self):
         self.messages = {}
@@ -29,7 +30,13 @@ class Interface:
     def wait(self, sec):
         self.delay += sec * 1000
 
+    def onTelemetry(self, func):
+        self.onTelemetryCallback = func
+        return func
+
     def update(self, ctrl):
         ctrl.messages = self.messages
-        ctrl.write()
+        telemetry = ctrl.write()
+        if self.onTelemetryCallback:
+            self.onTelemetryCallback(telemetry)
         self.clear()
