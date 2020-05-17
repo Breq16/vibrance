@@ -12,12 +12,16 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Breq16/vibrance",
-    packages=setuptools.find_packages(),
+    packages=["vibrance"],
     classifiers=[
         "Programming Language :: Python :: 3 :: Only",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Development Status :: 2 - Pre-Alpha"
     ],
+    license="MIT",
     python_requires='>=3.6',
+    install_requires=[],
+    extras_require=["mido", "websockify"],
+    }
 )
