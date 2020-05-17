@@ -22,6 +22,8 @@ setuptools.setup(
     license="MIT",
     python_requires='>=3.6',
     install_requires=[],
-    extras_require=["mido", "websockify"],
+    extras_require={
+        "midi":["mido"],
+        "relay":["websockify"],
     }
 )
