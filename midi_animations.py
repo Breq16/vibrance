@@ -1,6 +1,6 @@
 import time
 
-from . import *
+import midi
 
 PALETTE = (
     "000000", # black
@@ -20,7 +20,6 @@ PALETTE = (
 PORTS = list(range(9001, 9007))
 
 api = midi.Interface()
-api.connect("cloud.itsw.es")
 
 @api.onOctave(-2)
 def cycle(msg):
@@ -40,7 +39,6 @@ def cycle(msg):
 
     api.color((9002, 9005), PALETTE[i])
     api.color((9001, 9003, 9004, 9006), "000")
-    api.update()
 
 @api.onOctave(-1)
 def expand(msg):
@@ -56,7 +54,6 @@ def expand(msg):
 
     api.color((9004, 9006), PALETTE[i])
     api.color((9001, 9002, 9003, 9005), "000")
-    api.update()
 
 @api.onOctave(0)
 def chase(msg):
@@ -65,7 +62,6 @@ def chase(msg):
         api.color(port, PALETTE[i])
         api.color([p for p in PORTS if p != port], "000")
         api.wait(0.1)
-    api.update()
 
 @api.onOctave(1)
 def back_and_forth(msg):
@@ -78,16 +74,23 @@ def back_and_forth(msg):
             api.color((9004, 9005, 9006), PALETTE[i])
             api.color((9001, 9002, 9003), "000")
         api.wait(0.2)
-    api.update()
 
 
 @api.onNote(127)
 def clear(msg):
     api.color(PORTS, "000")
-    api.update()
 
 @api.onTelemetry
 def onTelemetry(telemetry):
     print(telemetry)
 
-api.run()
+if __name__ == "__main__":
+    import controller
+    import midi_input
+
+    ctrl = controller.Controller()
+    ctrl.connect("cloud.itsw.es")
+
+    min = midi_input.MidiInput()
+
+    api.run(min, ctrl)

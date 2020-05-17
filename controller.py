@@ -9,8 +9,6 @@ class Controller:
     def __init__(self):
         self.messages = {}
 
-        self.delay = 0
-
     def connect(self, relay, password=None, enable_ssl=True):
         if enable_ssl:
             self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
@@ -24,7 +22,6 @@ class Controller:
         # If no password is specified, default to the one in secrets/psk.txt
         if not password:
             password_path = (pathlib.Path(__file__).parent / "secrets/psk.txt").resolve()
-            print(password_path)
             if os.path.exists(password_path):
                 with open(password_path) as f:
                     password = f.read().rstrip("\r\n")
@@ -53,16 +50,6 @@ class Controller:
             message[key] = val
 
         self.messages[port].append(message)
-
-    def color(self, ports, color):
-        if hasattr(ports, "__iter__"):
-            for port in ports:
-                self.add(port, color, delay=self.delay)
-        else:
-            self.add(ports, color, delay=self.delay)
-
-    def wait(self, sec):
-        self.delay += sec * 1000
 
     def write(self):
         timestamp = time.time()

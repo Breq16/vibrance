@@ -1,37 +1,13 @@
-import os
-import atexit
+import interface
 
-import mido
-
-import controller
-
-class NoUpdate:
-    pass
-
-class Interface(controller.Controller):
+class MidiInterface(interface.Interface):
     def __init__(self):
         super().__init__()
-
-        if os.name == "posix":
-            self.midi = mido.open_input("vibrance", virtual=True)
-        elif os.name == "nt":
-            self.midi = mido.open_input("vibrance 3")
-        else:
-            raise ValueError("unsupported OS")
-
-        atexit.register(self.midi.close)
 
         self.onNoteCallbacks = {}
         self.onOctaveCallbacks = {}
         self.onAnyCallback = None
         self.onTelemetryCallback = None
-
-    def update(self):
-        telemetry = self.write()
-        self.clear()
-        if self.onTelemetryCallback:
-            self.onTelemetryCallback(telemetry)
-        return telemetry
 
     def onNote(self, note):
         def decorator(func):
@@ -54,17 +30,20 @@ class Interface(controller.Controller):
         self.onTelemetryCallback = func
         return func
 
-    def run(self):
-        for msg in self.midi:
+    def run(self, midi, ctrl):
+        for msg in midi:
             if msg.type == "note_on":
                 if msg.note in self.onNoteCallbacks:
                     self.onNoteCallbacks[msg.note](msg)
+                    self.update(ctrl)
                     continue
 
                 octave = msg.note // 12
                 if octave in self.onOctaveCallbacks:
                     self.onOctaveCallbacks[octave](msg)
+                    self.update(ctrl)
                     continue
 
                 if self.onAnyCallback:
                     self.onAnyCallback(msg)
+                    self.update(ctrl)

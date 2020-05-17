@@ -29,7 +29,6 @@ ZONEMAP = (
 )
 
 api = midi.Interface()
-api.connect("cloud.itsw.es")
 
 @api.onAny
 def test(msg):
@@ -39,7 +38,7 @@ def test(msg):
         octave = msg.note // 12
 
         if octave > 9:
-            return midi_api.NoUpdate() # Reserved for future use
+            return # Reserved for future use
 
         color = PALETTE[octNote]
         zones = ZONEMAP[octave]
@@ -49,10 +48,18 @@ def test(msg):
                 api.add(i+9001, color)
             elif msg.velocity > 75:
                 api.add(i+9001, "000000")
-    api.update()
 
 @api.onTelemetry
 def onTelemetry(telemetry):
     print(telemetry)
 
-api.run()
+if __name__ == "__main__":
+    import controller
+    import midi_input
+
+    ctrl = controller.Controller()
+    ctrl.connect("cloud.itsw.es")
+
+    min = midi_input.MidiInput()
+
+    api.run(min, ctrl)
