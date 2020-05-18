@@ -120,7 +120,7 @@ class ClientServer:
                 if type == socket_type.SERVER:
                     self.accept(sock)
                 elif type == socket_type.CLIENT:
-                    self.handleMessage(client)
+                    self.handleMessage(sock)
 
     def handleCheckAlive(self):
         while True:
