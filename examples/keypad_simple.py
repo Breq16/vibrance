@@ -94,11 +94,6 @@ def onNumber(key):
         enabled[9006] = True
     recompute()
 
-@api.onTelemetry
-def onTelemetry(telemetry):
-    #print(telemetry)
-    pass
-
 if __name__ == "__main__":
     import sys
 
