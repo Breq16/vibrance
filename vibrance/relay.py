@@ -23,6 +23,7 @@ class socket_type:
     WAITING = 1  # awaiting authentication
     CLIENT = 2  # connected client
 
+
 class ClientServer:
     """Server allowing clients to connect and receive updates."""
 
@@ -37,7 +38,8 @@ class ClientServer:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.bind(("127.0.0.1", port+100))
             sock.listen(16)
-            self.selector.register(sock, selectors.EVENT_READ, socket_type.SERVER)
+            self.selector.register(sock, selectors.EVENT_READ,
+                                   socket_type.SERVER)
 
         self.websockify_procs = []
         for port in self.ports:
@@ -72,7 +74,8 @@ class ClientServer:
     def accept(self, server):
         """Accepts a new client on the given server socket."""
         new_client, addr = server.accept()
-        self.selector.register(new_client, selectors.EVENT_READ, socket_type.CLIENT)
+        self.selector.register(new_client, selectors.EVENT_READ,
+                               socket_type.CLIENT)
         self.clients.append(new_client)
         self.lastMessage[new_client] = time.time()
 
@@ -157,6 +160,7 @@ class ClientServer:
                      "latency": int((time.time() - ts)*1000)}
         return telemetry
 
+
 class ControllerServer:
     """Server allowing controllers to connect and submit updates."""
 
@@ -173,14 +177,15 @@ class ControllerServer:
             self.ssl_context.load_default_certs()
             self.ssl_context.load_cert_chain(cert, key)
 
-            self.sock_unwrapped = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock_unwrapped = socket.socket(socket.AF_INET,
+                                                socket.SOCK_STREAM)
             self.sock_unwrapped.setsockopt(socket.SOL_SOCKET,
-                                              socket.SO_REUSEADDR, 1)
+                                           socket.SO_REUSEADDR, 1)
             self.sock_unwrapped.bind(("0.0.0.0", 9100))
             self.sock_unwrapped.listen(16)
 
             self.sock = self.ssl_context.wrap_socket(self.sock_unwrapped,
-                                               server_side=True)
+                                                     server_side=True)
         else:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -189,19 +194,19 @@ class ControllerServer:
 
         self.selector = selectors.DefaultSelector()
         self.selector.register(self.sock, selectors.EVENT_READ,
-                                       socket_type.SERVER)
+                               socket_type.SERVER)
 
     def accept(self):
         """Accepts a new controller client."""
         new_client, addr = self.sock.accept()
         if self.psk is not None:
             self.selector.register(new_client,
-                                           selectors.EVENT_READ,
-                                           socket_type.WAITING)
+                                   selectors.EVENT_READ,
+                                   socket_type.WAITING)
         else:
             self.selector.register(new_client,
-                                           selectors.EVENT_READ,
-                                           socket_type.CLIENT)
+                                   selectors.EVENT_READ,
+                                   socket_type.CLIENT)
 
     def remove(self, client):
         """Removes a controller client from all lists and closes it if
@@ -228,7 +233,8 @@ class ControllerServer:
 
         msg = data.decode("utf-8", "ignore")
         if msg == self.psk:
-            self.selector.modify(client, selectors.EVENT_READ, socket_type.CLIENT)
+            self.selector.modify(client, selectors.EVENT_READ,
+                                 socket_type.CLIENT)
             client.send(b"OK")
         else:
             self.remove(client)
@@ -255,7 +261,6 @@ class ControllerServer:
         telemetry = self.clientServer.broadcast(messages)
         client.send(json.dumps(telemetry).encode("utf-8"))
 
-
     def run(self):
         """Monitors for new connections or updates from controller clients and
         handles them appropriately."""
@@ -274,6 +279,7 @@ class ControllerServer:
                 elif type == socket_type.CLIENT:
                     self.handleUpdate(client)
 
+
 def wrapLoop(loopfunc):
     """Wraps a thread in a wrapper function to restart it if it exits."""
     def wrapped():
@@ -288,12 +294,17 @@ def wrapLoop(loopfunc):
             time.sleep(10)
     return wrapped
 
-clientServer = ClientServer(args.cert, args.key)
-controllerServer = ControllerServer(clientServer, args.psk, args.cert, args.key)
 
-clientServerThread = threading.Thread(target=wrapLoop(clientServer.run))
-controllerServerThread = threading.Thread(target=wrapLoop(controllerServer.run))
-clientCheckAliveThread = threading.Thread(target=wrapLoop(clientServer.handleCheckAlive))
+clientServer = ClientServer(args.cert, args.key)
+controllerServer = ControllerServer(clientServer, args.psk,
+                                    args.cert, args.key)
+
+clientServerThread = threading.Thread(
+    target=wrapLoop(clientServer.run))
+controllerServerThread = threading.Thread(
+    target=wrapLoop(controllerServer.run))
+clientCheckAliveThread = threading.Thread(
+    target=wrapLoop(clientServer.handleCheckAlive))
 
 clientServerThread.start()
 controllerServerThread.start()
