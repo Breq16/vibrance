@@ -126,7 +126,6 @@ class ClientServer:
         while True:
             for client in self.clients:
                 if time.time() - self.lastMessage[client] > 20:
-                    print("Removing apparently dead client")
                     self.remove(client)
                 time.sleep(10 / len(self.clients))
 
