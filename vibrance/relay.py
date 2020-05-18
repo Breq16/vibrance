@@ -178,7 +178,7 @@ class ControllerServer:
                                        socket_type.SERVER)
 
     def accept(self):
-        new_client, addr = cserver_sock.accept()
+        new_client, addr = self.sock.accept()
         if self.psk is not None:
             self.selector.register(new_client,
                                            selectors.EVENT_READ,
@@ -256,10 +256,11 @@ def wrapLoop(loopfunc):
             try:
                 loopfunc()
             except BaseException:
-                print(f"Exception in thread {loopfunc}")
+                print(f"Exception in thread {loopfunc}, restarting in 10s...")
                 traceback.print_exc()
             else:
-                print(f"Thread {loopfunc} exited, restarting")
+                print(f"Thread {loopfunc} exited, restarting in 10s...")
+            time.sleep(10)
     return wrapped
 
 clientServer = ClientServer(args.cert, args.key)
