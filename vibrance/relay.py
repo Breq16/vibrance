@@ -27,6 +27,7 @@ class ClientServer:
     """Server allowing clients to connect and receive updates."""
 
     def __init__(self, cert=None, key=None):
+        """Creates a ClientServer. If cert and key are specified, uses SSL."""
         self.ports = list(range(9001, 9007))
 
         self.selector = selectors.DefaultSelector()
@@ -68,13 +69,15 @@ class ClientServer:
 
         self.messages = {}
 
-    def accept(self, sock):
-        new_client, addr = sock.accept()
+    def accept(self, server):
+        """Accepts a new client on the given server socket."""
+        new_client, addr = server.accept()
         self.selector.register(new_client, selectors.EVENT_READ, socket_type.CLIENT)
         self.clients.append(new_client)
         self.lastMessage[new_client] = time.time()
 
     def remove(self, client):
+        """Removes a client from all lists and closes it if possible."""
         try:
             self.selector.unregister(client)
         except KeyError:
@@ -93,6 +96,7 @@ class ClientServer:
             pass
 
     def handleMessage(self, client):
+        """Handles an incoming message from a client."""
         try:
             data = client.recv(1024)
         except OSError:
@@ -111,6 +115,8 @@ class ClientServer:
             return
 
     def run(self):
+        """Monitors for new client connections or messages and handles them
+        appropriately."""
         while True:
             events = self.selector.select()
             for key, mask in events:
@@ -123,6 +129,8 @@ class ClientServer:
                     self.handleMessage(sock)
 
     def handleCheckAlive(self):
+        """Periodically checks each client to ensure they are still alive
+        and sending messages."""
         while True:
             for client in self.clients:
                 if time.time() - self.lastMessage[client] > 20:
@@ -130,6 +138,7 @@ class ClientServer:
                 time.sleep(10 / len(self.clients))
 
     def broadcastToClient(self, client):
+        """Broadcasts the appropriate current message to a single client."""
         port = client.getsockname()[1] - 100
         if str(port) not in self.messages:
             return
@@ -140,6 +149,7 @@ class ClientServer:
             self.remove(client)
 
     def broadcast(self, messages):
+        """Broadcasts the given messages to all clients."""
         ts = time.time()
         self.messages = messages
         self.pool.map(self.broadcastToClient, self.clients)
@@ -151,6 +161,10 @@ class ControllerServer:
     """Server allowing controllers to connect and submit updates."""
 
     def __init__(self, clientServer, psk=None, cert=None, key=None):
+        """Creats a ControllerServer with the specified ClientServer to
+        broadcast updates to. If psk is provided, password-protects the server.
+        If cert and key are provided, encrypts the server with SSL."""
+
         self.clientServer = clientServer
         self.psk = psk
 
@@ -178,6 +192,7 @@ class ControllerServer:
                                        socket_type.SERVER)
 
     def accept(self):
+        """Accepts a new controller client."""
         new_client, addr = self.sock.accept()
         if self.psk is not None:
             self.selector.register(new_client,
@@ -189,6 +204,9 @@ class ControllerServer:
                                            socket_type.CLIENT)
 
     def remove(self, client):
+        """Removes a controller client from all lists and closes it if
+        possible."""
+
         self.selector.unregister(client)
         try:
             client.close()
@@ -196,6 +214,9 @@ class ControllerServer:
             pass
 
     def authenticate(self, client):
+        """Handles messages from a controller client that needs to
+        authenticate."""
+
         try:
             data = client.recv(1024)
         except OSError:
@@ -213,6 +234,7 @@ class ControllerServer:
             self.remove(client)
 
     def handleUpdate(self, client):
+        """Handles update messages from a connected controller client."""
         try:
             data = client.recv(2**18)
         except OSError:
@@ -235,7 +257,9 @@ class ControllerServer:
 
 
     def run(self):
-        global messages
+        """Monitors for new connections or updates from controller clients and
+        handles them appropriately."""
+
         while True:
             events = self.selector.select()
 
@@ -251,6 +275,7 @@ class ControllerServer:
                     self.handleUpdate(client)
 
 def wrapLoop(loopfunc):
+    """Wraps a thread in a wrapper function to restart it if it exits."""
     def wrapped():
         while True:
             try:

@@ -20,7 +20,7 @@ function runApp() {
         function sendAcknowledges() {
             if (socket) {
                 socket.send("OK");
-                setTimeout(sendAcknowledges, 1000);
+                setTimeout(sendAcknowledges, 10000);
             }
         }
         sendAcknowledges();
