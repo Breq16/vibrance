@@ -94,7 +94,7 @@ class ClientServer:
 
     def handleMessage(self, client):
         try:
-            data = sock.recv(1024)
+            data = client.recv(1024)
         except OSError:
             self.remove(client)
             return
