@@ -10,10 +10,18 @@ import selectors
 import argparse
 from multiprocessing.dummy import Pool as ThreadPool
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description="Run a Vibrance relay server "
+                                 "(command server and client WebSocket "
+                                 "servers).")
+
 parser.add_argument("--psk", help="Optional password for the command server.")
-parser.add_argument("--cert", help="SSL certificate for secure WebSockets.")
-parser.add_argument("--key", help="SSL private key for secure WebSockets.")
+
+parser.add_argument("--cert", help="SSL certificate for securing the "
+                    "WebSockets and the command server.")
+
+parser.add_argument("--key", help="SSL private key for securing the WebSockets"
+                    " and the command server.")
+
 args = parser.parse_args()
 
 
