@@ -7,11 +7,20 @@ from . import interface
 
 
 class MidiInput:
-    def __init__(self):
+    def __init__(self, name):
         if os.name == "posix":
-            self.midi = mido.open_input("vibrance", virtual=True)
+            self.midi = mido.open_input(name, virtual=True)
         elif os.name == "nt":
-            self.midi = mido.open_input("vibrance 3")
+            try:
+                self.midi = mido.open_input(f"{name} 3")
+            except OSError as e:
+                raise OSError("It looks like you're trying to use Vibrance's "
+                              "MIDI interface on a Windows device. Vibrance "
+                              "MIDI uses 'virtual' MIDI ports in order to "
+                              "function properly. However, Windows does not "
+                              "support virtual ports. Please install the "
+                              "program 'loopMIDI' and create a loopback "
+                              "port manually before running Vibrance.") from e
         else:
             raise ValueError("unsupported OS")
 

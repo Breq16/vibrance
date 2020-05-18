@@ -11,7 +11,7 @@ if os.name == "posix":
 elif os.name == "nt":
     # Windows system
     # Rely on external MIDI loopback software
-    outport = mido.open_output("vibrance_loopback 4")
+    outport = mido.open_output("vibrance 4")
 else:
     raise ValueError("unsupported OS")
 
