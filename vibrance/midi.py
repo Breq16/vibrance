@@ -7,7 +7,16 @@ from . import interface
 
 
 class MidiInput:
+    """Input device that reads messages from a MIDI device."""
+
     def __init__(self, name):
+        """Creates a MidiInput that receives messages from the given port.
+
+        Linux/MacOS: Creates a virtual input port with the given name.
+
+        Windows: Attempts to connect to a loopback port with the given name.
+        """
+
         if os.name == "posix":
             self.midi = mido.open_input(name, virtual=True)
         elif os.name == "nt":
@@ -31,6 +40,8 @@ class MidiInput:
 
 
 class MidiInterface(interface.Interface):
+    """Interface that launches user functions based on a MidiInput."""
+
     def __init__(self):
         super().__init__()
 
@@ -39,12 +50,15 @@ class MidiInterface(interface.Interface):
         self.onAnyCallback = None
 
     def onNote(self, note):
+        """Launches a user function when the given note is received."""
         def decorator(func):
             self.onNoteCallbacks[note] = func
             return func
         return decorator
 
     def onOctave(self, octave):
+        """Launches a user function when a note in the given octave is
+        received."""
         octave += 2
 
         def decorator(func):
@@ -53,10 +67,14 @@ class MidiInterface(interface.Interface):
         return decorator
 
     def onAny(self, func):
+        """Launches a user function when any note is received."""
         self.onAnyCallback = func
         return func
 
     def run(self, midi, ctrl):
+        """Monitors for new notes from the MidiInput, launches user functions
+        as necessary, and sends updates using the controller as necessary."""
+
         for msg in midi:
             if msg.type == "note_on":
                 if msg.note in self.onNoteCallbacks:

@@ -5,7 +5,13 @@ from . import interface
 
 
 class KeypadInput:
+    """Input device that reads keystrokes from the keyboard in a terminal
+    window. Works on posix (Linux/MacOS) platforms only."""
+
     def __init__(self):
+        """Creates a KeypadInput that receives keystrokes from the current
+        window."""
+
         self.scr = curses.initscr()
         curses.noecho()
         curses.cbreak()
@@ -15,6 +21,7 @@ class KeypadInput:
         self.scr.refresh()
 
     def close(self):
+        """Resets the terminal state."""
         self.scr.keypad(False)
         curses.nocbreak()
         curses.echo()
@@ -28,6 +35,8 @@ class KeypadInput:
 
 
 class KeypadInterface(interface.Interface):
+    """Interface that launches user functions based on a KeypadInput."""
+
     def __init__(self):
         super().__init__()
 
@@ -39,32 +48,43 @@ class KeypadInterface(interface.Interface):
         self.onAnyCallback = None
 
     def onKey(self, key):
+        """Launches a user function when the given key is pressed."""
         def decorator(func):
             self.onKeyCallbacks[key] = func
             return func
         return decorator
 
     def onNumber(self, func):
+        """Launches a user function when any number key is pressed."""
         self.onNumberCallback = func
         return func
 
     def onLetter(self, func):
+        """Launches a user function when any letter key is pressed."""
         self.onLetterCallback = func
         return func
 
     def onSymbol(self, func):
+        """Launches a user function when any symbol key is pressed."""
         self.onSymbolCallback = func
         return func
 
     def onSpecial(self, func):
+        """Launches a user function when any special key (meta keys, arrow
+        keys, etc) is pressed."""
         self.onSpecialCallback = func
         return func
 
     def onAny(self, func):
+        """Launches a user function when any key is pressed."""
         self.onAnyCallback = func
         return func
 
     def run(self, keypad, ctrl):
+        """Monitors for new keystrokes from the KeypadInput, launches user
+        functions as necessary, and sends updates using the controller as
+        necessary."""
+
         for key in keypad:
             if key in self.onKeyCallbacks:
                 self.onKeyCallbacks[key](key)
