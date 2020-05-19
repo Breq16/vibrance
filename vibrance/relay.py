@@ -160,7 +160,7 @@ class ClientServer:
         """Broadcasts the appropriate current message to a single client."""
         zone = self._int_port_to_zone(client.getpeername()[1])
         if str(zone) not in self.messages:
-            return
+            print(f"No update found for {zone}")
         msg = json.dumps(self.messages[str(zone)])
         try:
             client.send(msg.encode("utf-8"))

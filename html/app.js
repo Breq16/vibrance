@@ -12,7 +12,7 @@ function setColor(color) {
 
 function runApp() {
     var socket;
-    var port = urlParams.get("zone") + 9000;
+    var port = Number(urlParams.get("zone")) + 9000;
     if (urlParams.get("ssl") === "0") {
         socket = new WebSocket("ws://"+urlParams.get("host")+":"+port,
                                "binary");
