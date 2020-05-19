@@ -35,7 +35,7 @@ color = PALETTE[0]
 
 running = True
 
-enabled = {port: False for port in range(9001, 9007)}
+enabled = {zone: False for zone in range(6)}
 
 updateNeeded = True
 
@@ -43,33 +43,33 @@ updateNeeded = True
 def setEnabled(key, state):
     global enabled
     if key in (pygame.K_KP1, ord('1')):
-        enabled[9001] = state
-        enabled[9004] = state
+        enabled[0] = state
+        enabled[3] = state
     elif key in (pygame.K_KP2, ord('2')):
-        enabled[9002] = state
-        enabled[9005] = state
+        enabled[1] = state
+        enabled[4] = state
     elif key in (pygame.K_KP3, ord('3')):
-        enabled[9003] = state
-        enabled[9006] = state
+        enabled[2] = state
+        enabled[5] = state
     elif key in (pygame.K_KP4, ord('4')):
-        enabled[9004] = state
+        enabled[3] = state
     elif key in (pygame.K_KP5, ord('5')):
-        enabled[9005] = state
+        enabled[4] = state
     elif key in (pygame.K_KP6, ord('6')):
-        enabled[9006] = state
+        enabled[5] = state
     elif key in (pygame.K_KP7, ord('7')):
-        enabled[9001] = state
+        enabled[0] = state
     elif key in (pygame.K_KP8, ord('8')):
-        enabled[9002] = state
+        enabled[1] = state
     elif key in (pygame.K_KP9, ord('9')):
-        enabled[9003] = state
+        enabled[2] = state
     elif key in (pygame.K_KP0, ord('0')):
-        enabled[9001] = state
-        enabled[9002] = state
-        enabled[9003] = state
-        enabled[9004] = state
-        enabled[9005] = state
-        enabled[9006] = state
+        enabled[0] = state
+        enabled[1] = state
+        enabled[2] = state
+        enabled[3] = state
+        enabled[4] = state
+        enabled[5] = state
 
 
 def changeColor(key):
@@ -118,8 +118,8 @@ while running:
 
     if updateNeeded:
         api.clear()
-        for port in enabled.keys():
-            api.color(port, color if enabled[port] else "000")
+        for zone in enabled.keys():
+            api.color(zone, color if enabled[zone] else "000")
         api.update(ctrl)
         updateNeeded = False
 

@@ -18,7 +18,7 @@ PALETTE = (
 
 color = PALETTE[0]
 
-enabled = {port: False for port in range(9001, 9007)}
+enabled = {zone: False for zone in range(6)}
 
 api = vibrance.keypad.KeypadInterface()
 
@@ -65,33 +65,33 @@ def onNumber(key):
     for zone in enabled:
         enabled[zone] = False
     if key == "1":
-        enabled[9001] = True
-        enabled[9004] = True
+        enabled[0] = True
+        enabled[3] = True
     elif key == "2":
-        enabled[9002] = True
-        enabled[9005] = True
+        enabled[1] = True
+        enabled[4] = True
     elif key == "3":
-        enabled[9003] = True
-        enabled[9006] = True
+        enabled[2] = True
+        enabled[5] = True
     elif key == "4":
-        enabled[9004] = True
+        enabled[3] = True
     elif key == "5":
-        enabled[9005] = True
+        enabled[4] = True
     elif key == "6":
-        enabled[9006] = True
+        enabled[5] = True
     elif key == "7":
-        enabled[9001] = True
+        enabled[0] = True
     elif key == "8":
-        enabled[9002] = True
+        enabled[1] = True
     elif key == "9":
-        enabled[9003] = True
+        enabled[2] = True
     elif key == "0":
-        enabled[9001] = True
-        enabled[9002] = True
-        enabled[9003] = True
-        enabled[9004] = True
-        enabled[9005] = True
-        enabled[9006] = True
+        enabled[0] = True
+        enabled[1] = True
+        enabled[2] = True
+        enabled[3] = True
+        enabled[4] = True
+        enabled[5] = True
     recompute()
 
 if __name__ == "__main__":

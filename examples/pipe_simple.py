@@ -16,7 +16,7 @@ PALETTE = (
     "FF0080",  # pink
 )
 
-PORTS = list(range(9001, 9007))
+ZONES = list(range(6))
 
 api = vibrance.pipe.PipeInterface()
 
@@ -24,33 +24,33 @@ api = vibrance.pipe.PipeInterface()
 def cycle(obj):
     i = obj
 
-    api.color((9001, 9004), PALETTE[i])
-    api.color((9002, 9003, 9005, 9006), "000")
+    api.color((0, 3), PALETTE[i])
+    api.color((1, 2, 4, 5), "000")
     api.wait(0.5)
 
-    api.color((9002, 9005), PALETTE[i])
-    api.color((9001, 9003, 9004, 9006), "000")
+    api.color((1, 4), PALETTE[i])
+    api.color((0, 2, 3, 5), "000")
     api.wait(0.5)
 
-    api.color((9003, 9006), PALETTE[i])
-    api.color((9001, 9002, 9004, 9005), "000")
+    api.color((2, 5), PALETTE[i])
+    api.color((0, 1, 3, 4), "000")
     api.wait(0.5)
 
-    api.color((9002, 9005), PALETTE[i])
-    api.color((9001, 9003, 9004, 9006), "000")
+    api.color((1, 4), PALETTE[i])
+    api.color((0, 1, 3, 4), "000")
 
 @api.handle
 def chase(obj):
     i = obj
 
-    for port in (9003, 9002, 9001, 9004, 9005, 9006):
-        api.color(port, PALETTE[i])
-        api.color([p for p in PORTS if p != port], "000")
+    for zone in (2, 1, 0, 3, 4, 5):
+        api.color(zone, PALETTE[i])
+        api.color([z for z in ZONES if z != zone], "000")
         api.wait(0.1)
 
 @api.handle
 def clear():
-    api.color(PORTS, "000")
+    api.color(ZONES, "000")
 
 @api.onTelemetry
 def onTelemetry(telemetry):

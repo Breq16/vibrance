@@ -46,9 +46,9 @@ def test(msg):
 
         for i, zone in enumerate(zones):
             if zone:
-                api.add(i+9001, color)
+                api.add(i, color)
             elif msg.velocity > 75:
-                api.add(i+9001, "000000")
+                api.add(i, "000000")
 
 @api.onTelemetry
 def onTelemetry(telemetry):

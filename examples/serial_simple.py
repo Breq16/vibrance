@@ -20,31 +20,31 @@ api = vibrance.uart.SerialInterface()
 
 @api.onByte(b"a")
 def a(byte):
-    api.color(9001, "FF0")
-    api.color((9002, 9003), "000")
+    api.color(0, "FF0")
+    api.color((1, 2), "000")
     api.wait(1)
-    api.color(9002, "FF0")
-    api.color((9001, 9003), "000")
+    api.color(1, "FF0")
+    api.color((0, 2), "000")
     api.wait(1)
-    api.color(9003, "FF0")
-    api.color((9001, 9002), "000")
+    api.color(2, "FF0")
+    api.color((0, 1), "000")
 
 @api.onByte(b"b")
 def b(byte):
-    api.color(9004, "FF0")
-    api.color((9005, 9006), "000")
+    api.color(3, "FF0")
+    api.color((4, 5), "000")
     api.wait(1)
-    api.color(9005, "FF0")
-    api.color((9004, 9006), "000")
+    api.color(4, "FF0")
+    api.color((3, 5), "000")
     api.wait(1)
-    api.color(9006, "FF0")
-    api.color((9004, 9005), "000")
+    api.color(5, "FF0")
+    api.color((3, 4), "000")
 
 @api.onAny
 def any(byte):
     i = int.from_bytes(byte, "little")
     if 0 <= i < len(PALETTE):
-        api.color(range(9001, 9007), PALETTE[i])
+        api.color(range(6), PALETTE[i])
 
 @api.onTelemetry
 def onTelemetry(telemetry):
