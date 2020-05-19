@@ -38,7 +38,6 @@ function runApp() {
         var decodedString = String.fromCharCode.apply(null,
                                                 new Uint8Array(event.data));
         var messages = JSON.parse(decodedString);
-        console.log(messages);
 
         messages.forEach(function(message, index) {
 
