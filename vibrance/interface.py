@@ -11,11 +11,11 @@ class Interface:
         self.messages = {}
         self.delay = 0
 
-    def add(self, port, color=None, **kwargs):
+    def add(self, zone, color=None, **kwargs):
         """Adds a new message to the messages buffer."""
 
-        if port not in self.messages:
-            self.messages[port] = []
+        if zone not in self.messages:
+            self.messages[zone] = []
 
         message = {}
         if color is not None:
@@ -24,17 +24,17 @@ class Interface:
         for key, val in kwargs.items():
             message[key] = val
 
-        self.messages[port].append(message)
+        self.messages[zone].append(message)
 
-    def color(self, ports, color):
+    def color(self, zones, color):
         """Creates a message to show the given color on the given ports after
         the delay offset."""
 
-        if hasattr(ports, "__iter__"):
-            for port in ports:
-                self.add(port, color, delay=self.delay)
+        if hasattr(zones, "__iter__"):
+            for zone in zones:
+                self.add(zone, color, delay=self.delay)
         else:
-            self.add(ports, color, delay=self.delay)
+            self.add(zones, color, delay=self.delay)
 
     def wait(self, sec):
         """Adds to the current delay offset."""
