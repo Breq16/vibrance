@@ -24,7 +24,7 @@ class Controller:
                                                    server_hostname=relay)
         else:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((relay, 9100))
+        self.socket.connect((relay, 9999))
 
         if psk:
             self.socket.send(psk.encode("utf-8"))

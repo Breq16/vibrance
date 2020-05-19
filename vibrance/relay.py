@@ -37,32 +37,34 @@ class ClientServer:
 
     def __init__(self, cert=None, key=None):
         """Creates a ClientServer. If cert and key are specified, uses SSL."""
-        self.ports = list(range(9001, 9007))
+        self.zones = list(range(32))
 
         self.selector = selectors.DefaultSelector()
 
-        for port in self.ports:
+        self.websockify_procs = []
+
+        for zone in self.zones:
+            ports = self._zone_to_ports(zone)
+
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sock.bind(("127.0.0.1", port+100))
+            sock.bind(("127.0.0.1", ports["internal"]))
             sock.listen(16)
             self.selector.register(sock, selectors.EVENT_READ,
                                    socket_type.SERVER)
 
-        self.websockify_procs = []
-        for port in self.ports:
             if cert is not None and key is not None:
                 self.websockify_procs.append(
-                    subprocess.Popen(["websockify", str(port),
-                                      f"localhost:{port+100}",
+                    subprocess.Popen(["websockify", str(ports["external"]),
+                                      f"localhost:{ports['internal']}",
                                       f"--cert={args.cert}",
                                       f"--key={args.key}"],
                                      stdout=subprocess.DEVNULL,
                                      stderr=subprocess.DEVNULL))
             else:
                 self.websockify_procs.append(
-                    subprocess.Popen(["websockify", str(port),
-                                      f"localhost:{port+100}"],
+                    subprocess.Popen(["websockify", str(ports["external"]),
+                                      f"localhost:{ports['internal']}"],
                                      stdout=subprocess.DEVNULL,
                                      stderr=subprocess.DEVNULL))
 
@@ -78,6 +80,12 @@ class ClientServer:
         self.pool = ThreadPool(32)
 
         self.messages = {}
+
+    def _zone_to_ports(self, zone):
+        return {"internal": zone+9050, "external": zone+9000}
+
+    def _int_port_to_zone(self, port):
+        return port - 9050
 
     def accept(self, server):
         """Accepts a new client on the given server socket."""
@@ -150,10 +158,10 @@ class ClientServer:
 
     def broadcastToClient(self, client):
         """Broadcasts the appropriate current message to a single client."""
-        port = client.getsockname()[1] - 100
-        if str(port) not in self.messages:
+        zone = self._int_port_to_zone(client.getpeername()[1])
+        if str(zone) not in self.messages:
             return
-        msg = json.dumps(self.messages[str(port)])
+        msg = json.dumps(self.messages[str(zone)])
         try:
             client.send(msg.encode("utf-8"))
         except OSError:
@@ -189,7 +197,7 @@ class ControllerServer:
                                                 socket.SOCK_STREAM)
             self.sock_unwrapped.setsockopt(socket.SOL_SOCKET,
                                            socket.SO_REUSEADDR, 1)
-            self.sock_unwrapped.bind(("0.0.0.0", 9100))
+            self.sock_unwrapped.bind(("0.0.0.0", 9999))
             self.sock_unwrapped.listen(16)
 
             self.sock = self.ssl_context.wrap_socket(self.sock_unwrapped,
@@ -197,7 +205,7 @@ class ControllerServer:
         else:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.bind(("0.0.0.0", 9100))
+            self.sock.bind(("0.0.0.0", 9999))
             self.sock.listen(16)
 
         self.selector = selectors.DefaultSelector()

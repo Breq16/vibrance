@@ -22,12 +22,12 @@ def mainloop(ctrl):
     global frame
     api.clear()
     for i in range(20):
-        api.add(9001, getColor(frame/50), delay=i*50)
-        api.add(9002, getColor(frame/50+math.pi*1/3), delay=i*50)
-        api.add(9003, getColor(frame/50+math.pi*2/3), delay=i*50)
-        api.add(9004, getColor(frame/50+math.pi), delay=i*50)
-        api.add(9005, getColor(frame/50+math.pi*4/3), delay=i*50)
-        api.add(9006, getColor(frame/50+math.pi*5/3), delay=i*50)
+        api.add(0, getColor(frame/50), delay=i*50)
+        api.add(1, getColor(frame/50+math.pi*1/3), delay=i*50)
+        api.add(2, getColor(frame/50+math.pi*2/3), delay=i*50)
+        api.add(3, getColor(frame/50+math.pi), delay=i*50)
+        api.add(4, getColor(frame/50+math.pi*4/3), delay=i*50)
+        api.add(5, getColor(frame/50+math.pi*5/3), delay=i*50)
         frame += 1
     ts = time.time()
     api.update(ctrl)
