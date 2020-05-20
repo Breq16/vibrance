@@ -168,10 +168,11 @@ class ClientServer:
         """Periodically checks each client to ensure they are still alive
         and sending messages."""
         while True:
-            for client in self.clients:
+            clients = list(self.clients.keys())
+            for client in clients:
                 if time.time() - self.lastMessage[client] > 20:
                     self.remove(client)
-                time.sleep(10 / len(self.clients))
+                time.sleep(10 / len(clients))
 
     def broadcastToClient(self, item):
         """Broadcasts the appropriate current message to a single client."""
