@@ -12,7 +12,7 @@ function setColor(color) {
 
 function runApp() {
     var socket;
-    var port = Number(urlParams.get("zone")) + 9000;
+    var port = 9000;
     if (urlParams.get("ssl") === "0") {
         socket = new WebSocket("ws://"+urlParams.get("host")+":"+port,
                                "binary");
@@ -23,6 +23,7 @@ function runApp() {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = function(event) {
+        socket.send(urlParams.get("zone"))
         document.getElementById("status").innerText = "Connected";
 
         function sendAcknowledges() {

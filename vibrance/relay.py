@@ -74,7 +74,7 @@ class ClientServer:
 
         atexit.register(shutdownWebsockifys)
 
-        self.clients = []
+        self.clients = {}
         self.lastMessage = {}
 
         self.pool = ThreadPool(32)
@@ -91,9 +91,24 @@ class ClientServer:
         """Accepts a new client on the given server socket."""
         new_client, addr = server.accept()
         self.selector.register(new_client, selectors.EVENT_READ,
-                               socket_type.CLIENT)
-        self.clients.append(new_client)
+                               socket_type.WAITING)
         self.lastMessage[new_client] = time.time()
+
+    def addToZone(self, client):
+        try:
+            data = client.recv(1024)
+        except OSError:
+            self.remove(client)
+            return
+        if len(data) == 0:
+            self.remove(client)
+            return
+
+        zone = data.decode("utf-8", "ignore")
+
+        self.selector.modify(client, selectors.EVENT_READ, socket_type.CLIENT)
+        self.clients[client] = zone
+        self.lastMessage[client] = time.time()
 
     def remove(self, client):
         """Removes a client from all lists and closes it if possible."""
@@ -102,7 +117,7 @@ class ClientServer:
         except KeyError:
             pass
         try:
-            self.clients.remove(client)
+            del self.clients[client]
         except ValueError:
             pass
         try:
@@ -156,12 +171,12 @@ class ClientServer:
                     self.remove(client)
                 time.sleep(10 / len(self.clients))
 
-    def broadcastToClient(self, client):
+    def broadcastToClient(self, item):
         """Broadcasts the appropriate current message to a single client."""
-        zone = self._int_port_to_zone(client.getsockname()[1])
-        if str(zone) not in self.messages:
+        client, zone = item
+        if zone not in self.messages:
             return
-        msg = json.dumps(self.messages[str(zone)])
+        msg = json.dumps(self.messages[zone])
         try:
             client.send(msg.encode("utf-8"))
         except OSError:
@@ -171,7 +186,7 @@ class ClientServer:
         """Broadcasts the given messages to all clients."""
         ts = time.time()
         self.messages = messages
-        self.pool.map(self.broadcastToClient, self.clients)
+        self.pool.map(self.broadcastToClient, self.clients.items())
         telemetry = {"clients": len(self.clients),
                      "latency": int((time.time() - ts)*1000)}
         return telemetry
