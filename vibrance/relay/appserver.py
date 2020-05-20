@@ -41,8 +41,8 @@ class AppServer:
         if cert is not None and key is not None:
             self.websockify_proc = subprocess.Popen(["websockify", "9000",
                                                      f"--unix-target={sockpath}",
-                                                     f"--cert={args.cert}",
-                                                     f"--key={args.key}",
+                                                     f"--cert={cert}",
+                                                     f"--key={key}",
                                                      "--ssl-only"],
                                                     stdout=subprocess.DEVNULL,
                                                     stderr=subprocess.DEVNULL)
