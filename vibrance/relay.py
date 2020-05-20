@@ -178,7 +178,6 @@ class ClientServer:
         """Broadcasts the appropriate current message to a single client."""
         client, zone = item
         if zone not in self.messages:
-            print(f"Zone {zone} not found")
             return
         msg = json.dumps(self.messages[zone])
         try:

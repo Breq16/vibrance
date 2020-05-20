@@ -32,7 +32,7 @@ function runApp() {
                 setTimeout(sendAcknowledges, 10000);
             }
         }
-        sendAcknowledges();
+        setTimeout(sendAcknowledges, 10000);
     }
 
     socket.onmessage = function(event) {
