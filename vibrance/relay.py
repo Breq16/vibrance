@@ -84,9 +84,6 @@ class ClientServer:
     def _zone_to_ports(self, zone):
         return {"internal": zone+9050, "external": zone+9000}
 
-    def _int_port_to_zone(self, port):
-        return port - 9050
-
     def accept(self, server):
         """Accepts a new client on the given server socket."""
         new_client, addr = server.accept()
@@ -178,6 +175,7 @@ class ClientServer:
         """Broadcasts the appropriate current message to a single client."""
         client, zone = item
         if zone not in self.messages:
+            print(f"Zone {zone} not found")
             return
         msg = json.dumps(self.messages[zone])
         try:
