@@ -6,8 +6,10 @@ import json
 import threading
 import traceback
 import ssl
+import os
 import selectors
 import argparse
+import tempfile
 from multiprocessing.dummy import Pool as ThreadPool
 
 parser = argparse.ArgumentParser(description="Run a Vibrance relay server "
@@ -40,18 +42,28 @@ class ClientServer:
 
         self.selector = selectors.DefaultSelector()
 
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind(("127.0.0.1", 9001))
-        sock.listen(128)
+        tempdir = os.path.join(tempfile.gettempdir(), "vibrance_relay")
+
+        if not os.path.exists(tempdir):
+            os.mkdir(tempdir)
+
+        sockpath = os.path.join(tempdir, "sock")
+
+        if os.path.exists(sockpath):
+            os.remove(sockpath)
+
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.bind(sockpath)
+        sock.listen(16)
         self.selector.register(sock, selectors.EVENT_READ,
                                socket_type.SERVER)
 
         if cert is not None and key is not None:
             self.websockify_proc = subprocess.Popen(["websockify", "9000",
-                                                     f"localhost:9001",
+                                                     f"--unix-target={sockpath}",
                                                      f"--cert={args.cert}",
-                                                     f"--key={args.key}"],
+                                                     f"--key={args.key}",
+                                                     "--ssl-only"],
                                                     stdout=subprocess.DEVNULL,
                                                     stderr=subprocess.DEVNULL)
         else:
