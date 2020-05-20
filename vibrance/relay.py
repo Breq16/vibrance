@@ -37,42 +37,30 @@ class ClientServer:
 
     def __init__(self, cert=None, key=None):
         """Creates a ClientServer. If cert and key are specified, uses SSL."""
-        self.zones = list(range(32))
 
         self.selector = selectors.DefaultSelector()
 
-        self.websockify_procs = []
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind(("127.0.0.1", 9001))
+        sock.listen(128)
+        self.selector.register(sock, selectors.EVENT_READ,
+                               socket_type.SERVER)
 
-        for zone in self.zones:
-            ports = self._zone_to_ports(zone)
+        if cert is not None and key is not None:
+            self.websockify_proc = subprocess.Popen(["websockify", "9000",
+                                                     f"localhost:9001",
+                                                     f"--cert={args.cert}",
+                                                     f"--key={args.key}"],
+                                                    stdout=subprocess.DEVNULL,
+                                                    stderr=subprocess.DEVNULL))
+        else:
+            self.websockify_proc = subprocess.Popen(["websockify", "9000",
+                                                     f"localhost:9001"],
+                                                    stdout=subprocess.DEVNULL,
+                                                    stderr=subprocess.DEVNULL))
 
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sock.bind(("127.0.0.1", ports["internal"]))
-            sock.listen(16)
-            self.selector.register(sock, selectors.EVENT_READ,
-                                   socket_type.SERVER)
-
-            if cert is not None and key is not None:
-                self.websockify_procs.append(
-                    subprocess.Popen(["websockify", str(ports["external"]),
-                                      f"localhost:{ports['internal']}",
-                                      f"--cert={args.cert}",
-                                      f"--key={args.key}"],
-                                     stdout=subprocess.DEVNULL,
-                                     stderr=subprocess.DEVNULL))
-            else:
-                self.websockify_procs.append(
-                    subprocess.Popen(["websockify", str(ports["external"]),
-                                      f"localhost:{ports['internal']}"],
-                                     stdout=subprocess.DEVNULL,
-                                     stderr=subprocess.DEVNULL))
-
-        def shutdownWebsockifys():
-            for proc in self.websockify_procs:
-                proc.terminate()
-
-        atexit.register(shutdownWebsockifys)
+        atexit.register(self.websockify_proc.terminate)
 
         self.clients = {}
         self.lastMessage = {}
@@ -80,9 +68,6 @@ class ClientServer:
         self.pool = ThreadPool(32)
 
         self.messages = {}
-
-    def _zone_to_ports(self, zone):
-        return {"internal": zone+9050, "external": zone+9000}
 
     def accept(self, server):
         """Accepts a new client on the given server socket."""
