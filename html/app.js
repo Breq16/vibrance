@@ -23,7 +23,7 @@ function runApp() {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = function(event) {
-        socket.send(urlParams.get("zone"))
+        socket.send(urlParams.get("zone"));
         document.getElementById("status").innerText = "Connected";
 
         function sendAcknowledges() {

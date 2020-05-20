@@ -159,6 +159,8 @@ class ClientServer:
 
                 if type == socket_type.SERVER:
                     self.accept(sock)
+                elif type == socket_type.WAITING:
+                    self.addToZone(sock)
                 elif type == socket_type.CLIENT:
                     self.handleMessage(sock)
 
