@@ -1,12 +1,9 @@
 import socket
-import subprocess
-import atexit
-import time
+import ssl
 import json
-import os
-import selectors
-import tempfile
 from multiprocessing.dummy import Pool as ThreadPool
+
+from . import wrappedsocket
 
 
 class AppServer:
@@ -20,39 +17,21 @@ class AppServer:
     def __init__(self, cert=None, key=None):
         """Creates an AppServer. If cert and key are specified, uses SSL."""
 
+        if cert is not None and key is not None:
+            self.ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            self.ssl_context.load_cert_chain(cert, key)
+        else:
+            self.ssl_context = None
+
         self.selector = selectors.DefaultSelector()
 
-        tempdir = os.path.join(tempfile.gettempdir(), "vibrance_relay")
-
-        if not os.path.exists(tempdir):
-            os.mkdir(tempdir)
-
-        sockpath = os.path.join(tempdir, "sock")
-
-        if os.path.exists(sockpath):
-            os.remove(sockpath)
-
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.bind(sockpath)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.bind(("0.0.0.0", 9000))
         sock.listen(16)
         self.selector.register(sock, selectors.EVENT_READ,
                                AppServer.SERVER)
 
-        if cert is not None and key is not None:
-            self.websockify_proc = subprocess.Popen(["websockify", "9000",
-                                                     f"--unix-target={sockpath}",
-                                                     f"--cert={cert}",
-                                                     f"--key={key}",
-                                                     "--ssl-only"],
-                                                    stdout=subprocess.DEVNULL,
-                                                    stderr=subprocess.DEVNULL)
-        else:
-            self.websockify_proc = subprocess.Popen(["websockify", "9000",
-                                                     f"localhost:9001"],
-                                                    stdout=subprocess.DEVNULL,
-                                                    stderr=subprocess.DEVNULL)
-
-        atexit.register(self.websockify_proc.terminate)
+        self.wrappedSockets = {}
 
         self.clients = {}
         self.lastMessage = {}
@@ -64,13 +43,16 @@ class AppServer:
     def accept(self, server):
         """Accepts a new client on the given server socket."""
         new_client, addr = server.accept()
+        wrapped = wrappedsocket.WrappedSocket(new_client, self.ssl_context)
+
         self.selector.register(new_client, selectors.EVENT_READ,
                                AppServer.WAITING)
+        self.wrappedSockets[new_client] = wrapped
         self.lastMessage[new_client] = time.time()
 
     def addToZone(self, client):
         try:
-            data = client.recv(1024)
+            data = self.wrappedSockets[client].recv()
         except OSError:
             self.remove(client)
             return
@@ -99,14 +81,14 @@ class AppServer:
         except KeyError:
             pass
         try:
-            client.close()
+            self.wrappedSockets[client].close()
         except OSError:
             pass
 
     def handleMessage(self, client):
         """Handles an incoming message from a client."""
         try:
-            data = client.recv(1024)
+            data = self.wrappedSockets[client].recv()
         except OSError:
             self.remove(client)
             return
@@ -158,7 +140,7 @@ class AppServer:
             return
         msg = json.dumps(self.messages[zone])
         try:
-            client.send(msg.encode("utf-8"))
+            self.wrappedClients[client].send(msg.encode("utf-8"))
         except OSError:
             self.remove(client)
 
