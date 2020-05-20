@@ -92,7 +92,7 @@ class AppServer:
             pass
         try:
             del self.clients[client]
-        except ValueError:
+        except KeyError:
             pass
         try:
             del self.lastMessage[client]
