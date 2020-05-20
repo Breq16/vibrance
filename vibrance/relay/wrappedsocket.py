@@ -7,6 +7,10 @@ from websockify import websocket
 class ClientDisconnected(OSError):
     pass
 
+class BinaryWebSocket(websocket.WebSocket):
+    def select_subprotocol(self, protocols):
+        return "binary"
+
 class WrappedSocket:
     def __init__(self, sock, ssl_context=None):
         self.sock = sock
@@ -28,10 +32,15 @@ class WrappedSocket:
 
         request = self.sock.recv(1024).decode("utf-8", "ignore")
 
-        headers = {k: v.strip() for k, v in [line.split(":", 1) for line in request.splitlines() if ":" in line]}
+        headers = {(k.lower() if k == "Upgrade" else k): v.strip() for k, v in [line.split(":", 1) for line in request.splitlines() if ":" in line]}
 
-        self.websock = websocket.WebSocket()
-        self.websock.accept(self.sock, headers)
+        self.websock = BinaryWebSocket()
+        try:
+            self.websock.accept(self.sock, headers)
+        except Exception:
+            print(headers)
+            raise
+
 
     def recv(self):
         if self.websock.pending():

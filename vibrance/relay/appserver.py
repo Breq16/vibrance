@@ -1,6 +1,8 @@
 import socket
 import ssl
 import json
+import time
+import selectors
 from multiprocessing.dummy import Pool as ThreadPool
 
 from . import wrappedsocket
@@ -26,6 +28,7 @@ class AppServer:
         self.selector = selectors.DefaultSelector()
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind(("0.0.0.0", 9000))
         sock.listen(16)
         self.selector.register(sock, selectors.EVENT_READ,
@@ -45,16 +48,18 @@ class AppServer:
         new_client, addr = server.accept()
         wrapped = wrappedsocket.WrappedSocket(new_client, self.ssl_context)
 
-        self.selector.register(new_client, selectors.EVENT_READ,
+        self.selector.register(wrapped.sock, selectors.EVENT_READ,
                                AppServer.WAITING)
-        self.wrappedSockets[new_client] = wrapped
-        self.lastMessage[new_client] = time.time()
+        self.wrappedSockets[wrapped.sock] = wrapped
+        self.lastMessage[wrapped.sock] = time.time()
 
     def addToZone(self, client):
         try:
             data = self.wrappedSockets[client].recv()
         except OSError:
             self.remove(client)
+            return
+        if data is None:
             return
         if len(data) == 0:
             self.remove(client)
