@@ -167,8 +167,11 @@ class ClientServer:
         while True:
             clients = list(self.clients.keys())
             for client in clients:
-                if time.time() - self.lastMessage[client] > 20:
-                    self.remove(client)
+                try:
+                    if time.time() - self.lastMessage[client] > 20:
+                        self.remove(client)
+                except KeyError:  # Client was already removed
+                    pass
                 time.sleep(10 / len(clients))
 
     def broadcastToClient(self, item):
