@@ -53,12 +53,12 @@ class ClientServer:
                                                      f"--cert={args.cert}",
                                                      f"--key={args.key}"],
                                                     stdout=subprocess.DEVNULL,
-                                                    stderr=subprocess.DEVNULL))
+                                                    stderr=subprocess.DEVNULL)
         else:
             self.websockify_proc = subprocess.Popen(["websockify", "9000",
                                                      f"localhost:9001"],
                                                     stdout=subprocess.DEVNULL,
-                                                    stderr=subprocess.DEVNULL))
+                                                    stderr=subprocess.DEVNULL)
 
         atexit.register(self.websockify_proc.terminate)
 
