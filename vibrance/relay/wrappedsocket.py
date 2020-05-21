@@ -13,6 +13,7 @@ class BinaryWebSocket(websocket.WebSocket):
 
 class WrappedSocket:
     def __init__(self, sock, ssl_context=None):
+        print("Doing handshake...")
         self.sock = sock
 
         # Determine if connection uses SSL
@@ -32,20 +33,22 @@ class WrappedSocket:
 
         request = self.sock.recv(1024).decode("utf-8", "ignore")
 
+        print(request)
+
         headers = {(k.lower() if k == "Upgrade" else k): v.strip() for k, v in [line.split(":", 1) for line in request.splitlines() if ":" in line]}
 
+        print(headers)
+
         self.websock = BinaryWebSocket()
-        try:
-            self.websock.accept(self.sock, headers)
-        except Exception:
-            print(headers)
-            raise
+
+        self.websock.accept(self.sock, headers)
 
 
     def recv(self):
-        if self.websock.pending():
+        try:
             return self.websock.recvmsg()
-        else:
+        except websocket.WebSocketWantReadError:
+            print("Socket reports read necessary but no data!")
             return None
 
     def send(self, msg):

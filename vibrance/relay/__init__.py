@@ -42,12 +42,12 @@ appServerThread = threading.Thread(
     target=wrapLoop(appServer.run))
 controlServerThread = threading.Thread(
     target=wrapLoop(controlServer.run))
-appCheckAliveThread = threading.Thread(
-    target=wrapLoop(appServer.handleCheckAlive))
+#appCheckAliveThread = threading.Thread(
+#    target=wrapLoop(appServer.handleCheckAlive))
 
 appServerThread.start()
 controlServerThread.start()
-appCheckAliveThread.start()
+#appCheckAliveThread.start()
 
 while True:
     time.sleep(1)

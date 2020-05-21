@@ -46,24 +46,31 @@ class AppServer:
     def accept(self, server):
         """Accepts a new client on the given server socket."""
         new_client, addr = server.accept()
-        wrapped = wrappedsocket.WrappedSocket(new_client, self.ssl_context)
+        try:
+            wrapped = wrappedsocket.WrappedSocket(new_client, self.ssl_context)
+        except Exception as e:
+            print(e)
+            return
 
-        self.selector.register(wrapped.sock, selectors.EVENT_READ,
-                               AppServer.WAITING)
+        try:
+            self.selector.register(wrapped.sock, selectors.EVENT_READ,
+                                   AppServer.WAITING)
+        except KeyError:
+            self.selector.unregister(wrapped.sock)
+            self.selector.register(wrapped.sock, selectors.EVENT_READ,
+                                   AppServer.WAITING)
         self.wrappedSockets[wrapped.sock] = wrapped
         self.lastMessage[wrapped.sock] = time.time()
 
     def addToZone(self, client):
-        try:
-            data = self.wrappedSockets[client].recv()
-        except OSError:
-            self.remove(client)
-            return
+        data = self.wrappedSockets[client].recv()
+
+        print(f"Got data {data}")
         if data is None:
             return
         if len(data) == 0:
-            self.remove(client)
             return
+
 
         zone = data.decode("utf-8", "ignore")
 
@@ -86,6 +93,7 @@ class AppServer:
         except KeyError:
             pass
         try:
+            print("Closing socket!!!!")
             self.wrappedSockets[client].close()
         except OSError:
             pass
