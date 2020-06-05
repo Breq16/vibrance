@@ -2,7 +2,7 @@ import socket
 import json
 import ssl
 import selectors
-
+import logging
 
 class ControlServer:
     """Server allowing controllers to connect and submit updates."""
@@ -17,28 +17,33 @@ class ControlServer:
         broadcast updates to. If psk is provided, password-protects the server.
         If cert and key are provided, encrypts the server with SSL."""
 
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Starting control server")
+
         self.appServer = appServer
         self.psk = psk
 
         if cert is not None and key is not None:
-            self.ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-            self.ssl_context.load_default_certs()
-            self.ssl_context.load_cert_chain(cert, key)
+            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            ssl_context.load_default_certs()
+            ssl_context.load_cert_chain(cert, key)
+        else:
+            ssl_context = None
 
-            self.sock_unwrapped = socket.socket(socket.AF_INET,
+        unwrapped = socket.socket(socket.AF_INET,
                                                 socket.SOCK_STREAM)
-            self.sock_unwrapped.setsockopt(socket.SOL_SOCKET,
+        unwrapped.setsockopt(socket.SOL_SOCKET,
                                            socket.SO_REUSEADDR, 1)
-            self.sock_unwrapped.bind(("0.0.0.0", 9999))
-            self.sock_unwrapped.listen(16)
+        unwrapped.bind(("0.0.0.0", 9999))
+        unwrapped.listen(16)
 
-            self.sock = self.ssl_context.wrap_socket(self.sock_unwrapped,
+        if ssl_context:
+            self.sock = ssl_context.wrap_socket(unwrapped,
                                                      server_side=True)
         else:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.bind(("0.0.0.0", 9999))
-            self.sock.listen(16)
+            self.sock = unwrapped
+
+        self.logger.info("Server socket established")
 
         self.selector = selectors.DefaultSelector()
         self.selector.register(self.sock, selectors.EVENT_READ,
@@ -73,18 +78,22 @@ class ControlServer:
         try:
             data = client.recv(1024)
         except OSError:
+            self.logger.warning("Unable to read from authenticating client")
             self.remove(client)
             return
         if len(data) == 0:
+            self.logger.warning("Authenticating client disconnected")
             self.remove(client)
             return
 
         msg = data.decode("utf-8", "ignore")
         if msg == self.psk:
+            self.logger.info("Client authenticated successfully")
             self.selector.modify(client, selectors.EVENT_READ,
                                  ControlServer.CLIENT)
             client.send(b"OK")
         else:
+            self.logger.warning("Client failed authentication")
             self.remove(client)
 
     def handleUpdate(self, client):
@@ -92,9 +101,11 @@ class ControlServer:
         try:
             data = client.recv(2**18)
         except OSError:
+            self.logger.warning("Unable to read update from client")
             self.remove(client)
             return
         if len(data) == 0:
+            self.logger.warning("Client disconnected")
             self.remove(client)
             return
 
@@ -103,6 +114,7 @@ class ControlServer:
         try:
             messages = json.loads(msg.split("\n")[0])
         except json.JSONDecodeError:
+            self.logger.warning("Invalid JSON in update")
             self.remove(client)
             return
 
@@ -120,9 +132,14 @@ class ControlServer:
                 client = key.fileobj
                 type = key.data
 
+                self.logger.debug("New message from socket")
+
                 if type == ControlServer.SERVER:
+                    self.logger.debug("Accepting new client connection")
                     self.accept()
                 elif type == ControlServer.WAITING:
+                    self.logger.debug("Handling authentication")
                     self.authenticate(client)
                 elif type == ControlServer.CLIENT:
+                    self.logger.debug("Handling inbound update")
                     self.handleUpdate(client)
