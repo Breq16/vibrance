@@ -1,7 +1,6 @@
 import multiprocessing
 
-from . import interface
-
+from . import Interface
 
 class PipeInput:
     """Input device that reads commands in a separate thread."""
@@ -21,7 +20,7 @@ class PipeInput:
         return self.out_pipe.recv()
 
 
-class PipeInterface(interface.Interface):
+class PipeInterface(Interface):
     """Interface that launches user functions based on a PipeInput."""
 
     def __init__(self):

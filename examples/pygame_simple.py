@@ -1,8 +1,8 @@
+import pygame
 import sys
 
-import pygame
-
 import vibrance
+import vibrance.interface.pygame_if
 
 PALETTE = (
     "000000",  # black
@@ -19,26 +19,11 @@ PALETTE = (
     "FF0080",  # pink
 )
 
+color = "000000"
 
-ctrl = vibrance.Controller()
-ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
-
-api = vibrance.Interface()
-
-pygame.init()
-
-screen = pygame.display.set_mode((1000, 500))
-pygame.display.set_caption("Vibrance Control")
-clock = pygame.time.Clock()
-
-color = PALETTE[0]
-
-running = True
+api = vibrance.interface.pygame_if.PyGameInterface()
 
 enabled = {zone: False for zone in range(6)}
-
-updateNeeded = True
-
 
 def setEnabled(key, state):
     global enabled
@@ -99,34 +84,31 @@ def changeColor(key):
     elif key == ord('v'):
         color = PALETTE[11]
 
+@api.keydown
+def keydown(key, pygame_in):
+    if ((ord('0') <= key <= ord('9'))
+            or (pygame.K_KP0 <= key <= pygame.K_KP9)):
+        setEnabled(key, True)
+    else:
+        changeColor(key)
+    update(pygame_in)
 
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if ((ord('0') <= event.key <= ord('9'))
-                    or (pygame.K_KP0 <= event.key <= pygame.K_KP9)):
-                setEnabled(event.key, True)
-            else:
-                changeColor(event.key)
-            updateNeeded = True
+@api.keyup
+def keyup(key, pygame_in):
+    setEnabled(key, False)
+    update(pygame_in)
 
-        elif event.type == pygame.KEYUP:
-            setEnabled(event.key, False)
-            updateNeeded = True
+def update(pygame_in):
+    global color
+    for zone in enabled.keys():
+        api.color(zone, color if enabled[zone] else "000")
 
-    if updateNeeded:
-        api.clear()
-        for zone in enabled.keys():
-            api.color(zone, color if enabled[zone] else "000")
-        api.update(ctrl)
-        updateNeeded = False
+    pygame_in.setColor(color)
 
-    pygame.draw.rect(screen, pygame.Color("#"+color), (0, 0, 1000, 500))
+if __name__ == "__main__":
+    ctrl = vibrance.Controller()
+    ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
-    pygame.display.flip()
+    pygame_in = vibrance.interface.pygame_if.PyGameInput()
 
-    clock.tick(30)
-
-pygame.quit()
+    api.run(pygame_in, ctrl)
