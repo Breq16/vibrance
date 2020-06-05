@@ -2,7 +2,7 @@ import pygame
 import sys
 
 import vibrance
-import vibrance.interface.pygame_if
+import vibrance.pygame_if
 
 PALETTE = (
     "000000",  # black
@@ -21,7 +21,7 @@ PALETTE = (
 
 color = "000000"
 
-api = vibrance.interface.pygame_if.PyGameInterface()
+api = vibrance.pygame_if.PyGameInterface()
 
 enabled = {zone: False for zone in range(6)}
 
@@ -109,6 +109,6 @@ if __name__ == "__main__":
     ctrl = vibrance.Controller()
     ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
-    pygame_in = vibrance.interface.pygame_if.PyGameInput()
+    pygame_in = vibrance.pygame_if.PyGameInput()
 
     api.run(pygame_in, ctrl)
