@@ -26,10 +26,14 @@ parser.add_argument("--cert", help="SSL certificate for securing the "
 parser.add_argument("--key", help="SSL private key for securing the WebSockets"
                     " and the command server.")
 
+log_levels = {"DEBUG": logging.DEBUG, "INFO": logging.INFO, "WARNING": logging.WARNING, "ERROR": logging.ERROR, "CRITICAL": logging.CRITICAL}
+
+parser.add_argument("--debug", help=f"Debug level {log_levels.keys()}", default="CRITICAL", choices=log_levels.keys())
+
 args = parser.parse_args()
 
 # TODO: make this an arg
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=log_levels[args.debug])
 
 def wrapLoop(loopfunc):
     """Wraps a thread in a wrapper function to restart it if it exits."""
