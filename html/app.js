@@ -1,6 +1,8 @@
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 
+var enc = new TextEncoder();
+
 function setColor(color) {
     document.getElementById("screen").style.backgroundColor = "#"+color;
     if (color === "000000" || color === "000") {
@@ -17,18 +19,18 @@ function runApp() {
         socket = new WebSocket("ws://"+urlParams.get("host")+":"+port,
                                "binary");
     } else {
-        socket = new WebSocket("wss://"+urlParams.get("host")+":"+port,
-                               "binary");
+        socket = new WebSocket("wss://"+urlParams.get("host")+":"+port, "binary");
     }
     socket.binaryType = "arraybuffer";
 
     socket.onopen = function(event) {
-        socket.send(urlParams.get("zone"));
+        console.log(urlParams.get("zone"));
+        socket.send(enc.encode(urlParams.get("zone")));
         document.getElementById("status").innerText = "Connected";
 
         function sendAcknowledges() {
             if (socket) {
-                socket.send("OK");
+                socket.send(enc.encode("OK"));
                 setTimeout(sendAcknowledges, 10000);
             }
         }
@@ -64,7 +66,12 @@ function runApp() {
         });
     }
 
+    socket.onerror = function(event) {
+      console.log("ERROR");
+    }
+
     socket.onclose = function(event) {
+        console.log("Closed "+event.reason)
         socket = null;
         setColor("000");
         document.getElementById("status").innerText = "Reconnecting";
