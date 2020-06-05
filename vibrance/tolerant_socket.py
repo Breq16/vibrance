@@ -22,7 +22,7 @@ class TolerantSocket:
     def makeSocket(self):
         self.logger.info("Creating new socket object...")
         unwrapped = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        unwrapped.settimeout(10)
+        unwrapped.settimeout(2)
 
         if self.context:
             self.socket = self.context.wrap_socket(unwrapped, server_hostname=self.host)
@@ -31,7 +31,7 @@ class TolerantSocket:
 
         try:
             self.socket.connect((self.host, self.port))
-        except ConnectionError as e:
+        except (ConnectionError, socket.timeout) as e:
             self.logger.error("Connection failed: %s", e)
             self.socket.close()
             self.socket = None
@@ -52,7 +52,7 @@ class TolerantSocket:
         if self.socket:
             try:
                 self.socket.send(data)
-            except ConnectionError as e:
+            except (ConnectionError, socket.timeout) as e:
                 self.logger.error("Send failed: %s", e)
                 self.socket.close()
                 self.socket = None
@@ -65,7 +65,7 @@ class TolerantSocket:
         if self.socket:
             try:
                 data = self.socket.recv(length)
-            except ConnectionError as e:
+            except (ConnectionError, socket.timeout) as e:
                 self.logger.error("Recv failed: %s", e)
                 self.socket.close()
                 self.socket = None
