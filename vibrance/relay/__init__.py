@@ -9,7 +9,7 @@ import ssl
 import os
 import selectors
 import argparse
-import tempfile
+import logging
 from multiprocessing.dummy import Pool as ThreadPool
 
 from . import appserver, controlserver
@@ -27,6 +27,9 @@ parser.add_argument("--key", help="SSL private key for securing the WebSockets"
                     " and the command server.")
 
 args = parser.parse_args()
+
+# TODO: make this an arg
+logging.basicConfig(level=logging.DEBUG)
 
 def wrapLoop(loopfunc):
     """Wraps a thread in a wrapper function to restart it if it exits."""

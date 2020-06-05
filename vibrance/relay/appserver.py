@@ -6,6 +6,7 @@ import json
 import os
 import selectors
 import tempfile
+import logging
 from multiprocessing.dummy import Pool as ThreadPool
 
 
@@ -17,40 +18,58 @@ class AppServer:
     WAITING = 1  # awaiting authentication
     CLIENT = 2  # connected client
 
-    def __init__(self, cert=None, key=None):
+    def __init__(self, cert=None, key=None, unix_socket=True):
         """Creates an AppServer. If cert and key are specified, uses SSL."""
+
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Starting application server")
 
         self.selector = selectors.DefaultSelector()
 
-        tempdir = os.path.join(tempfile.gettempdir(), "vibrance_relay")
+        if unix_socket:
+            tempdir = os.path.join(tempfile.gettempdir(), "vibrance_relay")
 
-        if not os.path.exists(tempdir):
-            os.mkdir(tempdir)
+            if not os.path.exists(tempdir):
+                os.mkdir(tempdir)
 
-        sockpath = os.path.join(tempdir, "sock")
+            sockpath = os.path.join(tempdir, "sock")
 
-        if os.path.exists(sockpath):
-            os.remove(sockpath)
+            if os.path.exists(sockpath):
+                os.remove(sockpath)
 
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.bind(sockpath)
-        sock.listen(16)
-        self.selector.register(sock, selectors.EVENT_READ,
-                               AppServer.SERVER)
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            sock.bind(sockpath)
+            sock.listen(16)
+            self.selector.register(sock, selectors.EVENT_READ,
+                                   AppServer.SERVER)
 
-        if cert is not None and key is not None:
-            self.websockify_proc = subprocess.Popen(["websockify", "9000",
-                                                     f"--unix-target={sockpath}",
-                                                     f"--cert={cert}",
-                                                     f"--key={key}",
-                                                     "--ssl-only"],
-                                                    stdout=subprocess.DEVNULL,
-                                                    stderr=subprocess.DEVNULL)
+            websockify_target = f"--unix-target={sockpath}"
+
+            self.logger.info("UNIX socket established")
+
         else:
-            self.websockify_proc = subprocess.Popen(["websockify", "9000",
-                                                     f"localhost:9001"],
-                                                    stdout=subprocess.DEVNULL,
-                                                    stderr=subprocess.DEVNULL)
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind(("localhost", 9001))
+            sock.listen(16)
+            self.selector.register(sock, selectors.EVENT_READ, AppServer.SERVER)
+
+            websockify_target = "localhost:9001"
+
+            self.logger.info("Server TCP socket established")
+
+        websockify_ssl_args = []
+        if cert is not None and key is not None:
+            websockify_ssl_args.append(f"--cert={cert}")
+            websockify_ssl_args.append(f"--key={key}")
+            websockify_ssl_args.append(f"--ssl-only")
+
+        self.websockify_proc = subprocess.Popen(["websockify", "9000",
+                                                 websockify_target] + websockify_ssl_args,
+                                                stdout=subprocess.DEVNULL,
+                                                stderr=subprocess.DEVNULL)
+        self.logger.info("Websockify server started")
+
 
         atexit.register(self.websockify_proc.terminate)
 
@@ -72,9 +91,12 @@ class AppServer:
         try:
             data = client.recv(1024)
         except OSError:
+            self.logger.debug("Removing client: expected zone, received OSError")
             self.remove(client)
             return
+
         if len(data) == 0:
+            self.logger.debug("Removing client: expected zone, received disconnect")
             self.remove(client)
             return
 
@@ -83,6 +105,8 @@ class AppServer:
         self.selector.modify(client, selectors.EVENT_READ, AppServer.CLIENT)
         self.clients[client] = zone
         self.lastMessage[client] = time.time()
+
+        self.logger.debug("Client added to zone")
 
     def remove(self, client):
         """Removes a client from all lists and closes it if possible."""
@@ -109,17 +133,21 @@ class AppServer:
             data = client.recv(1024)
         except OSError:
             self.remove(client)
+            self.logger.debug("Removing client: expected check-alive, received OSError")
             return
         if len(data) == 0:  # Client disconnected
             self.remove(client)
+            self.logger.debug("Removing client: expected check-alive, received disconnect")
             return
 
         msg = data.decode("utf-8", "ignore")
 
         if msg == "OK":
             self.lastMessage[client] = time.time()
+            self.logger.debug("Check-alive successful")
         else:
             self.remove(client)
+            self.logger.debug("Removing client: expected check-alive, received other data")
             return
 
     def run(self):
@@ -131,11 +159,16 @@ class AppServer:
                 sock = key.fileobj
                 type = key.data
 
+                self.logger.debug("New message from socket")
+
                 if type == AppServer.SERVER:
+                    self.logger.debug("Accepting new client connection")
                     self.accept(sock)
                 elif type == AppServer.WAITING:
+                    self.logger.debug("Adding socket to zone")
                     self.addToZone(sock)
                 elif type == AppServer.CLIENT:
+                    self.logger.debug("Handling inbound check-alive message")
                     self.handleMessage(sock)
 
     def handleCheckAlive(self):
@@ -146,6 +179,7 @@ class AppServer:
             for client in clients:
                 try:
                     if time.time() - self.lastMessage[client] > 20:
+                        self.logger.debug("Removing client, no check-alive messages recently")
                         self.remove(client)
                 except KeyError:  # Client was already removed
                     pass
