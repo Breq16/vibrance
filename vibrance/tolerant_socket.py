@@ -1,8 +1,7 @@
 import socket
-import ssl
-import select
 import logging
 import json
+
 
 class TolerantSocket:
     def __init__(self, debug_level=logging.CRITICAL):
@@ -25,7 +24,8 @@ class TolerantSocket:
         unwrapped.settimeout(2)
 
         if self.context:
-            self.socket = self.context.wrap_socket(unwrapped, server_hostname=self.host)
+            self.socket = self.context.wrap_socket(unwrapped,
+                                                   server_hostname=self.host)
         else:
             self.socket = unwrapped
 

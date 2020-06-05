@@ -1,10 +1,9 @@
-import socket
-import selectors
 import json
 import time
 import ssl
 
 from . import tolerant_socket
+
 
 class Controller:
     """Manages a connection with a relay server and sends new messages."""

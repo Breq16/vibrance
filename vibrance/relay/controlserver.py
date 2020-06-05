@@ -4,6 +4,7 @@ import ssl
 import selectors
 import logging
 
+
 class ControlServer:
     """Server allowing controllers to connect and submit updates."""
 
@@ -30,16 +31,13 @@ class ControlServer:
         else:
             ssl_context = None
 
-        unwrapped = socket.socket(socket.AF_INET,
-                                                socket.SOCK_STREAM)
-        unwrapped.setsockopt(socket.SOL_SOCKET,
-                                           socket.SO_REUSEADDR, 1)
+        unwrapped = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        unwrapped.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         unwrapped.bind(("0.0.0.0", 9999))
         unwrapped.listen(16)
 
         if ssl_context:
-            self.sock = ssl_context.wrap_socket(unwrapped,
-                                                     server_side=True)
+            self.sock = ssl_context.wrap_socket(unwrapped, server_side=True)
         else:
             self.sock = unwrapped
 

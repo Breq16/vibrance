@@ -1,16 +1,8 @@
-import socket
-import subprocess
-import atexit
 import time
-import json
 import threading
 import traceback
-import ssl
-import os
-import selectors
 import argparse
 import logging
-from multiprocessing.dummy import Pool as ThreadPool
 
 from . import appserver, controlserver
 
@@ -26,14 +18,18 @@ parser.add_argument("--cert", help="SSL certificate for securing the "
 parser.add_argument("--key", help="SSL private key for securing the WebSockets"
                     " and the command server.")
 
-log_levels = {"DEBUG": logging.DEBUG, "INFO": logging.INFO, "WARNING": logging.WARNING, "ERROR": logging.ERROR, "CRITICAL": logging.CRITICAL}
+log_levels = {"DEBUG": logging.DEBUG, "INFO": logging.INFO,
+              "WARNING": logging.WARNING, "ERROR": logging.ERROR,
+              "CRITICAL": logging.CRITICAL}
 
-parser.add_argument("--debug", help=f"Debug level {log_levels.keys()}", default="CRITICAL", choices=log_levels.keys())
+parser.add_argument("--debug", help=f"Debug level {log_levels.keys()}",
+                    default="CRITICAL", choices=log_levels.keys())
 
 args = parser.parse_args()
 
 # TODO: make this an arg
 logging.basicConfig(level=log_levels[args.debug])
+
 
 def wrapLoop(loopfunc):
     """Wraps a thread in a wrapper function to restart it if it exits."""
@@ -52,7 +48,7 @@ def wrapLoop(loopfunc):
 
 appServer = appserver.AppServer(args.cert, args.key)
 controlServer = controlserver.ControlServer(appServer, args.psk,
-                                    args.cert, args.key)
+                                            args.cert, args.key)
 
 appServerThread = threading.Thread(
     target=wrapLoop(appServer.run))

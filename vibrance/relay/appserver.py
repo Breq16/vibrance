@@ -52,7 +52,8 @@ class AppServer:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.bind(("localhost", 9001))
             sock.listen(16)
-            self.selector.register(sock, selectors.EVENT_READ, AppServer.SERVER)
+            self.selector.register(sock, selectors.EVENT_READ,
+                                   AppServer.SERVER)
 
             websockify_target = "localhost:9001"
 
@@ -62,14 +63,14 @@ class AppServer:
         if cert is not None and key is not None:
             websockify_ssl_args.append(f"--cert={cert}")
             websockify_ssl_args.append(f"--key={key}")
-            websockify_ssl_args.append(f"--ssl-only")
+            websockify_ssl_args.append("--ssl-only")
 
         self.websockify_proc = subprocess.Popen(["websockify", "9000",
-                                                 websockify_target] + websockify_ssl_args,
+                                                 websockify_target]
+                                                + websockify_ssl_args,
                                                 stdout=subprocess.DEVNULL,
                                                 stderr=subprocess.DEVNULL)
         self.logger.info("Websockify server started")
-
 
         atexit.register(self.websockify_proc.terminate)
 
@@ -91,12 +92,14 @@ class AppServer:
         try:
             data = client.recv(1024)
         except OSError:
-            self.logger.debug("Removing client: expected zone, received OSError")
+            self.logger.debug("Removing client: expected zone, "
+                              "received OSError")
             self.remove(client)
             return
 
         if len(data) == 0:
-            self.logger.debug("Removing client: expected zone, received disconnect")
+            self.logger.debug("Removing client: expected zone, "
+                              "received disconnect")
             self.remove(client)
             return
 
@@ -133,11 +136,13 @@ class AppServer:
             data = client.recv(1024)
         except OSError:
             self.remove(client)
-            self.logger.debug("Removing client: expected check-alive, received OSError")
+            self.logger.debug("Removing client: expected check-alive, "
+                              "received OSError")
             return
         if len(data) == 0:  # Client disconnected
             self.remove(client)
-            self.logger.debug("Removing client: expected check-alive, received disconnect")
+            self.logger.debug("Removing client: expected check-alive, "
+                              "received disconnect")
             return
 
         msg = data.decode("utf-8", "ignore")
@@ -147,7 +152,8 @@ class AppServer:
             self.logger.debug("Check-alive successful")
         else:
             self.remove(client)
-            self.logger.debug("Removing client: expected check-alive, received other data")
+            self.logger.debug("Removing client: expected check-alive, "
+                              "received other data")
             return
 
     def run(self):
@@ -179,7 +185,8 @@ class AppServer:
             for client in clients:
                 try:
                     if time.time() - self.lastMessage[client] > 20:
-                        self.logger.debug("Removing client, no check-alive messages recently")
+                        self.logger.debug("Removing client, no check-alive "
+                                          "messages recently")
                         self.remove(client)
                 except KeyError:  # Client was already removed
                     pass
