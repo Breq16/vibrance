@@ -2,5 +2,6 @@
 
 from vibrance.controller import Controller
 from vibrance.interface import Interface
+from vibrance.manager import Manager
 
-__all__ = ["Controller", "Interface"]
+__all__ = ["Controller", "Interface", "Manager"]

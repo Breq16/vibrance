@@ -7,7 +7,7 @@ import mido
 class MidiInput:
     """Input device that reads messages from a MIDI device."""
 
-    def __init__(self, name):
+    def __init__(self, name="vibrance"):
         """Creates a MidiInput that receives messages from the given port.
 
         Linux/MacOS: Creates a virtual input port with the given name.

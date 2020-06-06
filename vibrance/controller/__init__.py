@@ -16,6 +16,9 @@ class Controller:
         log into the relay using the password. If enable_ssl is provided,
         connect to the server using SSL."""
 
+        if self.enabled:
+            self.close()
+
         if enable_ssl:
             context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
             context.load_default_certs()
