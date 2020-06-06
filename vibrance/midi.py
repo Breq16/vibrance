@@ -35,30 +35,26 @@ class MidiInput:
 
         atexit.register(self.midi.close)
 
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        msg = self.midi.receive()
+    def read(self):
         events = []
+        for msg in self.midi.iter_pending():
+            if msg.type not in ("note_on", "note_off"):
+                return tuple()
 
-        if msg.type not in ("note_on", "note_off"):
-            return tuple()
+            event_attrs = {"note": msg.note,
+                           "velocity": msg.velocity,
+                           "channel": msg.channel,
+                           "time": msg.time}
 
-        event_attrs = {"note": msg.note,
-                       "velocity": msg.velocity,
-                       "channel": msg.channel,
-                       "time": msg.time}
+            events.append({"input": "midi",
+                           "type": msg.type, **event_attrs})
 
-        events.append({"input": "midi",
-                       "type": msg.type, **event_attrs})
+            events.append({"input": "midi",
+                           "type": f"{msg.type}_{msg.note}", **event_attrs})
 
-        events.append({"input": "midi",
-                       "type": f"{msg.type}_{msg.note}", **event_attrs})
+            octave = msg.note // 12 - 2
 
-        octave = msg.note // 12 - 2
-
-        events.append({"input": "midi",
-                       "type": f"{msg.type}_oct_{octave}", **event_attrs})
+            events.append({"input": "midi",
+                           "type": f"{msg.type}_oct_{octave}", **event_attrs})
 
         return tuple(events)

@@ -71,16 +71,13 @@ class Interface:
             return func
         return decorator
 
-    def handleEvents(self, events, ctrl):
-        for event in events:
-            self.logger.info("New event with input %s and type %s", event["input"], event["type"])
+    def handle(self, input, ctrl):
+        for event in input.read():
             if event["input"] in self.callbacks:
                 if event["type"] in self.callbacks[event["input"]]:
-                    self.logger.info("Callback found: %s", self.callbacks[event["input"]][event["type"]])
                     self.callbacks[event["input"]][event["type"]](event)
                     self.update(ctrl)
 
     def run(self, input, ctrl):
-        self.logger.info("Running...")
-        for events in input:
-            self.handleEvents(events, ctrl)
+        while True:
+            self.handle(input, ctrl)
