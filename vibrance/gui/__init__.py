@@ -1,22 +1,18 @@
 from flask import Flask, send_file, send_from_directory, request, jsonify
 
-import vibrance
+from . import manager
 
 app = Flask(__name__)
 
-manager = vibrance.Manager()
+manager = manager.Manager()
 
 @app.route("/")
 def index():
-    return send_file("index.html")
+    return send_file("static/index.html")
 
-@app.route("/css/<path:path>")
-def css(path):
+@app.route("/static/<path:path>")
+def static(path):
     return send_from_directory("css", path)
-
-@app.route("/js/<path:path>")
-def js(path):
-    return send_from_directory("js", path)
 
 @app.route("/input", methods=["POST"])
 def input():
