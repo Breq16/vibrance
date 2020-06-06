@@ -1,10 +1,18 @@
+import logging
+
+logging.basicConfig(level=logging.CRITICAL)
+
 class Interface:
     """Provides a user-friendly API for creating color messages and launching
     user functions based on input."""
 
     def __init__(self):
         self.clear()
+        self.callbacks = {}
         self.onTelemetryCallback = None
+
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Starting interface")
 
     def clear(self):
         """Clears the messages buffer and resets the delay offset."""
@@ -53,3 +61,23 @@ class Interface:
         if self.onTelemetryCallback:
             self.onTelemetryCallback(telemetry)
         self.clear()
+
+    def on(self, input, event):
+        if input not in self.callbacks:
+            self.callbacks[input] = {}
+        def decorator(func):
+            self.logger.info("Registering %s for callback %s, %s", func, input, event)
+            self.callbacks[input][event] = func
+            return func
+        return decorator
+
+    def handle(self, input, ctrl):
+        for event in input.read():
+            if event["input"] in self.callbacks:
+                if event["type"] in self.callbacks[event["input"]]:
+                    self.callbacks[event["input"]][event["type"]](event)
+                    self.update(ctrl)
+
+    def run(self, input, ctrl):
+        while True:
+            self.handle(input, ctrl)

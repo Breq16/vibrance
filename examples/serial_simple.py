@@ -1,5 +1,4 @@
 import vibrance
-import vibrance.uart
 
 PALETTE = (
     "000000",  # black
@@ -16,10 +15,10 @@ PALETTE = (
     "FF0080",  # pink
 )
 
-api = vibrance.uart.SerialInterface()
+api = vibrance.Interface()
 
-@api.onByte(b"a")
-def a(byte):
+@api.on("uart", "a")
+def a(event):
     api.color(0, "FF0")
     api.color((1, 2), "000")
     api.wait(1)
@@ -29,8 +28,8 @@ def a(byte):
     api.color(2, "FF0")
     api.color((0, 1), "000")
 
-@api.onByte(b"b")
-def b(byte):
+@api.on("uart", "b")
+def b(event):
     api.color(3, "FF0")
     api.color((4, 5), "000")
     api.wait(1)
@@ -40,9 +39,9 @@ def b(byte):
     api.color(5, "FF0")
     api.color((3, 4), "000")
 
-@api.onAny
-def any(byte):
-    i = int.from_bytes(byte, "little")
+@api.on("uart", "byte")
+def any(event):
+    i = int.from_bytes(event["byte"], "little")
     if 0 <= i < len(PALETTE):
         api.color(range(6), PALETTE[i])
 
@@ -52,10 +51,11 @@ def onTelemetry(telemetry):
 
 if __name__ == "__main__":
     import sys
+    import vibrance.input.uart
 
     ctrl = vibrance.Controller()
     ctrl.connect(sys.argv[1], sys.argv[2])
 
-    uart = vibrance.uart.SerialInput(sys.argv[3])
+    uart = vibrance.input.uart.SerialInput(sys.argv[3])
 
     api.run(uart, ctrl)

@@ -1,5 +1,4 @@
 import vibrance
-import vibrance.pipe
 
 PALETTE = (
     "000000",  # black
@@ -18,11 +17,11 @@ PALETTE = (
 
 ZONES = list(range(6))
 
-api = vibrance.pipe.PipeInterface()
+api = vibrance.Interface()
 
-@api.handle
-def cycle(obj):
-    i = obj
+@api.on("pipe", "cycle")
+def cycle(event):
+    i = event["color"]
 
     api.color((0, 3), PALETTE[i])
     api.color((1, 2, 4, 5), "000")
@@ -39,17 +38,17 @@ def cycle(obj):
     api.color((1, 4), PALETTE[i])
     api.color((0, 1, 3, 4), "000")
 
-@api.handle
-def chase(obj):
-    i = obj
+@api.on("pipe", "chase")
+def chase(event):
+    i = event["color"]
 
     for zone in (2, 1, 0, 3, 4, 5):
         api.color(zone, PALETTE[i])
         api.color([z for z in ZONES if z != zone], "000")
         api.wait(0.1)
 
-@api.handle
-def clear():
+@api.on("pipe", "clear")
+def clear(event):
     api.color(ZONES, "000")
 
 @api.onTelemetry
@@ -59,12 +58,13 @@ def onTelemetry(telemetry):
 if __name__ == "__main__":
     import sys
     import multiprocessing
+    import vibrance.input.pipe
     import tkinter as tk
 
     ctrl = vibrance.Controller()
     ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
-    pipe = vibrance.pipe.PipeInput()
+    pipe = vibrance.input.pipe.PipeInput()
 
     api_proc = multiprocessing.Process(target=api.run, args=(pipe, ctrl))
     api_proc.start()
@@ -72,11 +72,11 @@ if __name__ == "__main__":
     root = tk.Tk()
 
     cycleButton = tk.Button(text="cycle",
-                            command=lambda: pipe.launch("cycle", 6))
+                            command=lambda: pipe.launch("cycle", {"color": 6}))
     cycleButton.pack()
 
     chaseButton = tk.Button(text="chase",
-                            command=lambda: pipe.launch("chase", 7))
+                            command=lambda: pipe.launch("chase", {"color": 7}))
     chaseButton.pack()
 
     clearButton = tk.Button(text="clear",

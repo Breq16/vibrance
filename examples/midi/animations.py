@@ -1,5 +1,4 @@
 import vibrance
-import vibrance.midi
 
 PALETTE = (
     "000000", # black
@@ -18,11 +17,11 @@ PALETTE = (
 
 ZONES = list(range(6))
 
-api = vibrance.midi.MidiInterface()
+api = vibrance.Interface()
 
-@api.onOctave(-2)
-def cycle(msg):
-    i = msg.note % 12
+@api.on("midi", "note_on_oct_-2")
+def cycle(event):
+    i = event["note"] % 12
 
     api.color((0, 3), PALETTE[i])
     api.color((1, 2, 4, 5), "000")
@@ -39,9 +38,9 @@ def cycle(msg):
     api.color((1, 4), PALETTE[i])
     api.color((0, 2, 3, 5), "000")
 
-@api.onOctave(-1)
-def expand(msg):
-    i = msg.note % 12
+@api.on("midi", "note_on_oct_-1")
+def expand(event):
+    i = event["note"] % 12
 
     api.add(1, PALETTE[i])
     api.color((0, 2, 3, 4, 5), "000")
@@ -54,17 +53,17 @@ def expand(msg):
     api.color((3, 5), PALETTE[i])
     api.color((0, 1, 2, 4), "000")
 
-@api.onOctave(0)
-def chase(msg):
-    i = msg.note % 12
+@api.on("midi", "note_on_oct_0")
+def chase(event):
+    i = event["note"] % 12
     for zone in (2, 1, 0, 3, 4, 5):
         api.color(zone, PALETTE[i])
         api.color([z for z in ZONES if z != zone], "000")
         api.wait(0.1)
 
-@api.onOctave(1)
-def back_and_forth(msg):
-    i = msg.note % 12
+@api.on("midi", "note_on_oct_1")
+def back_and_forth(event):
+    i = event["note"] % 12
     for j in range(8):
         if j % 2 == 0:
             api.color((0, 1, 2), PALETTE[i])
@@ -75,8 +74,8 @@ def back_and_forth(msg):
         api.wait(0.2)
 
 
-@api.onNote(127)
-def clear(msg):
+@api.on("midi", "note_on_127")
+def clear(event):
     api.color(ZONES, "000")
 
 @api.onTelemetry
@@ -85,10 +84,11 @@ def onTelemetry(telemetry):
 
 if __name__ == "__main__":
     import sys
+    import vibrance.input.midi
 
     ctrl = vibrance.Controller()
     ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
-    min = vibrance.midi.MidiInput("vibrance")
+    min = vibrance.input.midi.MidiInput("vibrance")
 
     api.run(min, ctrl)

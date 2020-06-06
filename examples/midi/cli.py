@@ -3,14 +3,14 @@ import threading
 import sys
 
 import vibrance
-import vibrance.midi
+import vibrance.input.midi
 
 module_names = ["simple", "animations"]
 
 ctrl = vibrance.Controller()
 ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
-mdin = vibrance.midi.MidiInput("vibrance")
+mdin = vibrance.input.midi.MidiInput("vibrance")
 
 modules = {}
 for name in module_names:

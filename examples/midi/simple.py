@@ -1,5 +1,4 @@
 import vibrance
-import vibrance.midi
 
 PALETTE = (
     "000000", # black
@@ -29,14 +28,14 @@ ZONEMAP = (
     (0, 0, 1, 0, 0, 1), # oct 7
 )
 
-api = vibrance.midi.MidiInterface()
+api = vibrance.Interface()
 
-@api.onAny
-def test(msg):
-    print(msg)
-    if msg.type == "note_on":
-        octNote = msg.note % 12
-        octave = msg.note // 12
+@api.on("midi", "note_on")
+def test(event):
+    print(event)
+    if event["type"] == "note_on":
+        octNote = event["note"] % 12
+        octave = event["note"] // 12
 
         if octave > 9:
             return # Reserved for future use
@@ -47,7 +46,7 @@ def test(msg):
         for i, zone in enumerate(zones):
             if zone:
                 api.add(i, color)
-            elif msg.velocity > 75:
+            elif event["velocity"] > 75:
                 api.add(i, "000000")
 
 @api.onTelemetry
@@ -56,10 +55,11 @@ def onTelemetry(telemetry):
 
 if __name__ == "__main__":
     import sys
+    import vibrance.input.midi
 
     ctrl = vibrance.Controller()
     ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
-    min = vibrance.midi.MidiInput("vibrance")
+    min = vibrance.input.midi.MidiInput("vibrance")
 
     api.run(min, ctrl)

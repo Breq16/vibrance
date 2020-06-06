@@ -2,7 +2,6 @@ import pygame
 import sys
 
 import vibrance
-import vibrance.pygame_if
 
 PALETTE = (
     "000000",  # black
@@ -21,7 +20,7 @@ PALETTE = (
 
 color = "000000"
 
-api = vibrance.pygame_if.PyGameInterface()
+api = vibrance.Interface()
 
 enabled = {zone: False for zone in range(6)}
 
@@ -84,31 +83,32 @@ def changeColor(key):
     elif key == ord('v'):
         color = PALETTE[11]
 
-@api.keydown
-def keydown(key, pygame_in):
+@api.on("pygame", "keydown")
+def keydown(event):
+    key = event["key"]
     if ((ord('0') <= key <= ord('9'))
             or (pygame.K_KP0 <= key <= pygame.K_KP9)):
         setEnabled(key, True)
     else:
         changeColor(key)
-    update(pygame_in)
+    update()
 
-@api.keyup
-def keyup(key, pygame_in):
-    setEnabled(key, False)
-    update(pygame_in)
+@api.on("pygame", "keyup")
+def keyup(event):
+    setEnabled(event["key"], False)
+    update()
 
-def update(pygame_in):
+def update():
     global color
     for zone in enabled.keys():
         api.color(zone, color if enabled[zone] else "000")
 
-    pygame_in.setColor(color)
-
 if __name__ == "__main__":
+    import vibrance.input.pygame_if
+    
     ctrl = vibrance.Controller()
     ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
-    pygame_in = vibrance.pygame_if.PyGameInput()
+    pygame_in = vibrance.input.pygame_if.PyGameInput()
 
     api.run(pygame_in, ctrl)

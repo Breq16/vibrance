@@ -1,5 +1,4 @@
 import vibrance
-import vibrance.keypad
 
 PALETTE = (
     "000000",  # black
@@ -20,7 +19,7 @@ color = PALETTE[0]
 
 enabled = {zone: False for zone in range(6)}
 
-api = vibrance.keypad.KeypadInterface()
+api = vibrance.Interface()
 
 def recompute():
     global color, enabled
@@ -30,8 +29,9 @@ def recompute():
         else:
             api.color(zone, "000")
 
-@api.onLetter
-def onLetter(key):
+@api.on("keypad", "letter")
+def onLetter(event):
+    key = event["key"]
     global color
     if key == "q":
         color = PALETTE[0]
@@ -59,8 +59,9 @@ def onLetter(key):
         color = PALETTE[11]
     recompute()
 
-@api.onNumber
-def onNumber(key):
+@api.on("keypad", "number")
+def onNumber(event):
+    key = event["key"]
     global enabled
     for zone in enabled:
         enabled[zone] = False
@@ -95,11 +96,13 @@ def onNumber(key):
     recompute()
 
 if __name__ == "__main__":
-    import sys
+    import sys, logging
+    import vibrance.input.keypad
 
     ctrl = vibrance.Controller()
+
     ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
-    keypad = vibrance.keypad.KeypadInput()
+    keypad = vibrance.input.keypad.KeypadInput()
 
     api.run(keypad, ctrl)
