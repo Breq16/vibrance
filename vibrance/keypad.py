@@ -15,43 +15,46 @@ class KeypadInput:
         curses.noecho()
         curses.cbreak()
         self.scr.keypad(True)
+        self.scr.nodelay(True)
         atexit.register(self.close)
         self.scr.addstr(1, 1, "Vibrance: Keypad Input")
         self.scr.refresh()
 
     def close(self):
         """Resets the terminal state."""
+        self.scr.nodelay(False)
         self.scr.keypad(False)
         curses.nocbreak()
         curses.echo()
         curses.endwin()
 
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        key = self.scr.getkey()
+    def read(self):
         events = []
+        while True:
+            try:
+                key = self.scr.getkey()
+            except curses.error: # No input to process
+                break
 
-        if key in string.ascii_letters:
-            key_type = "letter"
-        elif key in string.digits:
-            key_type = "number"
-        elif key in string.punctuation:
-            key_type = "symbol"
-        else:
-            key_type = "special"
+            if key in string.ascii_letters:
+                key_type = "letter"
+            elif key in string.digits:
+                key_type = "number"
+            elif key in string.punctuation:
+                key_type = "symbol"
+            else:
+                key_type = "special"
 
-        events.append({"input": "keypad",
-                       "type": "keydown",
-                       "key": key})
+            events.append({"input": "keypad",
+                           "type": "keydown",
+                           "key": key})
 
-        events.append({"input": "keypad",
-                       "type": key_type,
-                       "key": key})
+            events.append({"input": "keypad",
+                           "type": key_type,
+                           "key": key})
 
-        events.append({"input": "keypad",
-                       "type": f"key_{key}",
-                       "key": key})
+            events.append({"input": "keypad",
+                           "type": f"key_{key}",
+                           "key": key})
 
         return tuple(events)

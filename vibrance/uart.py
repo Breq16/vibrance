@@ -1,8 +1,6 @@
 import serial
 import atexit
 
-from . import interface
-
 
 class SerialInput:
     """Input device that reads bytes from a serial port."""
@@ -13,44 +11,17 @@ class SerialInput:
         self.port = serial.Serial(port)
         atexit.register(self.port.close)
 
-    def __iter__(self):
-        return self
+    def read(self):
+        events = []
+        while self.port.in_waiting > 0:
+            byte = self.port.read().decode("utf-8")
 
-    def __next__(self):
-        return self.port.read()
+            events.append({"input": "uart",
+                           "type": "byte",
+                           "byte": byte})
 
+            events.append({"input": "uart",
+                           "type": byte,
+                           "byte": byte})
 
-class SerialInterface(interface.Interface):
-    """Interface that launches user functions based on a SerialInput."""
-
-    def __init__(self):
-        super().__init__()
-
-        self.onByteCallbacks = {}
-        self.onAnyCallback = None
-
-    def onByte(self, byte):
-        """Launches a user function when the given byte is received."""
-        def decorator(func):
-            self.onByteCallbacks[byte] = func
-            return func
-        return decorator
-
-    def onAny(self, func):
-        """Launches a user function when any byte is received."""
-        self.onAnyCallback = func
-        return func
-
-    def run(self, ser, ctrl):
-        """Monitors for new bytes from the SerialInput, launches user functions
-        as necessary, and sends updates using the controller as necessary."""
-
-        for byte in ser:
-            if byte in self.onByteCallbacks:
-                self.onByteCallbacks[byte](byte)
-                self.update(ctrl)
-                continue
-
-            if self.onAnyCallback:
-                self.onAnyCallback(byte)
-                self.update(ctrl)
+        return tuple(events)
