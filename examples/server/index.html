@@ -32,40 +32,53 @@
       <div class="col-sm-4">
         <div class="card">
           <div class="card-body">
-            <h2 class="card-title">Inputs</h2>
-            <br>
-            <div class="card">
-              <div class="card-body">
-                <h5>MIDI</h5>
-              </div>
-            </div>
-            <br>
-            <div class="card">
-              <div class="card-body">
-                <h5>UART</h5>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <div class="card">
-          <div class="card-body">
-            <h2 class="card-title">Plugins</h2>
-            <p>TODO</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <div class="card">
-          <div class="card-body">
-            <h2 class="card-title">Relays</h2>
+            <h2 class="card-title">Input</h2>
             <div class="form-group">
-              <label for="host">Relay IP:</label>
-              <input type="text" class="form-control" id="host"></input>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="inputDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Input Device
+                </button>
+                <div class="dropdown-menu" aria-labelledby="inputDropdown">
+                  <a class="dropdown-item" href="#">MIDI</a>
+                  <a class="dropdown-item" href="#">Serial</a>
+                </div>
+              </div>
               <br>
-              <label for="host">Password:</label>
-              <input type="text" class="form-control" id="host"></input>
+              <label for="inputName">Input Name:</label>
+              <input type="text" class="form-control" id="inputName"></input>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="card-title">Script</h2>
+            <div class="form-group">
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="scriptDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Script
+                </button>
+                <div class="dropdown-menu" aria-labelledby="scriptDropdown">
+                  <a class="dropdown-item" href="#">Big Brain v0.1</a>
+                  <a class="dropdown-item" href="#">Read Between The Lines</a>
+                  <a class="dropdown-item" href="#">Simple Effects</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="card-title">Relay</h2>
+            <div class="form-group">
+              <label for="relayIp">Relay IP:</label>
+              <input type="text" class="form-control" id="relayIp"></input>
+              <br>
+              <label for="password">Password:</label>
+              <input type="password" class="form-control" id="password"></input>
               <br>
               <button type="button" class="btn btn-primary">Connect</button>
             </div>
