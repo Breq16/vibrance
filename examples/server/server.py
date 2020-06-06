@@ -4,7 +4,7 @@ import vibrance
 
 app = Flask(__name__)
 
-ctrl = vibrance.Controller()
+manager = vibrance.Manager()
 
 @app.route("/")
 def index():
@@ -29,26 +29,12 @@ def script():
 @app.route("/relay", methods=["POST"])
 def relay():
     data = request.json
-    if ctrl.enabled:
-        ctrl.close()
-    ctrl.connect(data["host"], (data["psk"] if "psk" in data else None))
+    manager.connect(data["host"], (data["psk"] if "psk" in data else None))
     return ""
 
 @app.route("/status")
 def status():
-    info = {"input":{}, "script":{}, "relay":{}}
-
-    if not ctrl.enabled:
-        info["relay"]["enabled"] = False
-    else:
-        ctrl.socket.repair()
-        info["relay"]["enabled"] = True
-        if not ctrl.socket.connected:
-            info["relay"]["connected"] = False
-        else:
-            info["relay"]["connected"] = True
-
-    return jsonify(info)
+    return jsonify(manager.getStatus())
 
 if __name__ == "__main__":
     app.run()

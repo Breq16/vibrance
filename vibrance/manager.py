@@ -37,6 +37,9 @@ class Manager:
     def chooseScript(self, script):
         self.script = script
 
+    def getStatus(self):
+        return {}
+
     def handle(self):
         self.script.api.handle(self.input, self.ctrl)
 
