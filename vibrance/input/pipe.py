@@ -1,6 +1,5 @@
 import multiprocessing
 
-from . import Interface
 
 class PipeInput:
     """Input device that reads commands in a separate thread."""

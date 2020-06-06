@@ -3,8 +3,6 @@ import atexit
 
 import mido
 
-from . import interface
-
 
 class MidiInput:
     """Input device that reads messages from a MIDI device."""

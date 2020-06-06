@@ -1,5 +1,4 @@
 import vibrance
-import vibrance.keypad
 
 PALETTE = (
     "000000",  # black
@@ -98,11 +97,12 @@ def onNumber(event):
 
 if __name__ == "__main__":
     import sys, logging
+    import vibrance.input.keypad
 
     ctrl = vibrance.Controller()
 
     ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
-    keypad = vibrance.keypad.KeypadInput()
+    keypad = vibrance.input.keypad.KeypadInput()
 
     api.run(keypad, ctrl)

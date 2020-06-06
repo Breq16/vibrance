@@ -1,5 +1,4 @@
 import vibrance
-import vibrance.pipe
 
 PALETTE = (
     "000000",  # black
@@ -59,12 +58,13 @@ def onTelemetry(telemetry):
 if __name__ == "__main__":
     import sys
     import multiprocessing
+    import vibrance.input.pipe
     import tkinter as tk
 
     ctrl = vibrance.Controller()
     ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
-    pipe = vibrance.pipe.PipeInput()
+    pipe = vibrance.input.pipe.PipeInput()
 
     api_proc = multiprocessing.Process(target=api.run, args=(pipe, ctrl))
     api_proc.start()

@@ -2,7 +2,7 @@ import multiprocessing
 
 import pygame
 
-from . import Interface, pipe
+from . import pipe
 
 
 class PyGameInput(pipe.PipeInput):

@@ -1,5 +1,4 @@
 import vibrance
-import vibrance.uart
 
 PALETTE = (
     "000000",  # black
@@ -52,10 +51,11 @@ def onTelemetry(telemetry):
 
 if __name__ == "__main__":
     import sys
+    import vibrance.input.uart
 
     ctrl = vibrance.Controller()
     ctrl.connect(sys.argv[1], sys.argv[2])
 
-    uart = vibrance.uart.SerialInput(sys.argv[3])
+    uart = vibrance.input.uart.SerialInput(sys.argv[3])
 
     api.run(uart, ctrl)
