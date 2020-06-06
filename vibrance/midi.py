@@ -36,58 +36,29 @@ class MidiInput:
         atexit.register(self.midi.close)
 
     def __iter__(self):
-        return iter(self.midi)
+        return self
 
+    def __next__(self):
+        msg = self.midi.receive()
+        events = []
 
-class MidiInterface(interface.Interface):
-    """Interface that launches user functions based on a MidiInput."""
+        if msg.type not in ("note_on", "note_off"):
+            return tuple()
 
-    def __init__(self):
-        super().__init__()
+        event_attrs = {"note": msg.note,
+                       "velocity": msg.velocity,
+                       "channel": msg.channel,
+                       "time": msg.time}
 
-        self.onNoteCallbacks = {}
-        self.onOctaveCallbacks = {}
-        self.onAnyCallback = None
+        events.append({"input": "midi",
+                       "type": msg.type, **event_attrs})
 
-    def onNote(self, note):
-        """Launches a user function when the given note is received."""
-        def decorator(func):
-            self.onNoteCallbacks[note] = func
-            return func
-        return decorator
+        events.append({"input": "midi",
+                       "type": f"{msg.type}_{msg.note}", **event_attrs})
 
-    def onOctave(self, octave):
-        """Launches a user function when a note in the given octave is
-        received."""
-        octave += 2
+        octave = msg.note // 12 - 2
 
-        def decorator(func):
-            self.onOctaveCallbacks[octave] = func
-            return func
-        return decorator
+        events.append({"input": "midi",
+                       "type": f"{msg.type}_oct_{octave}", **event_attrs})
 
-    def onAny(self, func):
-        """Launches a user function when any note is received."""
-        self.onAnyCallback = func
-        return func
-
-    def run(self, midi, ctrl):
-        """Monitors for new notes from the MidiInput, launches user functions
-        as necessary, and sends updates using the controller as necessary."""
-
-        for msg in midi:
-            if msg.type == "note_on":
-                if msg.note in self.onNoteCallbacks:
-                    self.onNoteCallbacks[msg.note](msg)
-                    self.update(ctrl)
-                    continue
-
-                octave = msg.note // 12
-                if octave in self.onOctaveCallbacks:
-                    self.onOctaveCallbacks[octave](msg)
-                    self.update(ctrl)
-                    continue
-
-                if self.onAnyCallback:
-                    self.onAnyCallback(msg)
-                    self.update(ctrl)
+        return tuple(events)
