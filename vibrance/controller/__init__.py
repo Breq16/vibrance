@@ -9,7 +9,7 @@ class Controller:
     """Manages a connection with a relay server and sends new messages."""
 
     def __init__(self):
-        self.connected = False
+        self.enabled = False
 
     def connect(self, relay, psk=None, enable_ssl=True):
         """Connects to a relay server at the given address. If psk is provided,
@@ -25,6 +25,8 @@ class Controller:
         self.socket = tolerant_socket.TolerantSocket()
         self.socket.connect(relay, 9999, psk, context)
 
+        self.enabled = True
+
     def write(self, messages):
         """Send messages to the relay server to be broadcasted to clients.
         Returns performance data from both the relay server and local
@@ -39,3 +41,8 @@ class Controller:
         stats["server"] = self.socket.recvJSON()
         stats["controller"] = {"latency": int((time.time()-timestamp)*1000)}
         return stats
+
+    def close(self):
+        self.socket.close()
+        self.socket = None
+        self.enabled = False

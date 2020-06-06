@@ -99,3 +99,16 @@ class TolerantSocket:
                     self.logger.error("Invalid JSON received")
                 else:
                     return data
+
+    def close(self):
+        self.logger.info("Closing socket")
+        if self.socket:
+            self.socket.close()
+            self.socket = None
+
+    @property
+    def connected(self):
+        if self.socket:
+            return True
+        else:
+            return False
