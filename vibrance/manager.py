@@ -74,7 +74,8 @@ class Manager:
         return {}
 
     def handle(self):
-        self.script.handle(self.input, self.ctrl)
+        if self.script:
+            self.script.handle(self.input, self.ctrl)
 
     def run(self):
         while True:

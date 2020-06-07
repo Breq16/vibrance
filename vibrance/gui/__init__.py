@@ -1,4 +1,5 @@
 import sys
+import threading
 
 from flask import Flask, send_file, send_from_directory, request, jsonify, render_template
 
@@ -44,4 +45,7 @@ def status():
     return jsonify(manager.getStatus())
 
 if __name__ == "__main__":
-    app.run()
+    appthread = threading.Thread(target=app.run)
+    appthread.start()
+
+    manager.run()
