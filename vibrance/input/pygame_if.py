@@ -6,11 +6,19 @@ from . import pipe
 
 
 class PyGameInput(pipe.PipeInput):
-    def __init__(self):
-        super().__init__("pygame")
+    def __init__(self, name=""):
+        super().__init__(name, input_type="pygame")
 
+    def open(self):
         pygame_proc = multiprocessing.Process(target=self.runApp)
         pygame_proc.start()
+        super().open()
+
+    def close(self):
+        super().close()
+        pygame_proc.terminate()
+        pygame_proc.close()
+        pygame_proc = None
 
     def runApp(self):
         pygame.init()

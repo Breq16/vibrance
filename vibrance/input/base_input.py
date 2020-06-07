@@ -9,4 +9,4 @@ class BaseInput:
         pass
 
     def read(self):
-        pass
+        return tuple()

@@ -18,8 +18,8 @@ class Manager:
     def connect(self, host, psk=None):
         self.ctrl.connect(host, psk)
 
-    def addInput(self, input, name):
-        self.inputs[name] = input
+    def addInput(self, input):
+        self.inputs[input.name] = input
 
     def addScript(self, path):
         specname = f"manager_script_{len(self.scripts)}"
@@ -38,15 +38,18 @@ class Manager:
         pass
 
     def addInputsFromDirectory(self, path):
-        files = [file for file in os.path.listdir(path) if file.endswith(".py")]
+        files = [os.path.join(path, file) for file in os.listdir(path) if file.endswith(".py")]
 
     def addScriptsFromDirectory(self, path):
-        files = [file for file in os.path.listdir(path) if file.endswith(".py")]
+        files = [os.path.join(path, file) for file in os.listdir(path) if file.endswith(".py")]
         for file in files:
             self.addScript(file)
 
     def chooseInput(self, input):
+        if self.input:
+            self.input.close()
         self.input = input
+        self.input.open()
 
     def chooseScript(self, script):
         self.script = script

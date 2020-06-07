@@ -3,9 +3,9 @@ import atexit
 
 import mido
 
-from base_input import BaseInput
+from . import base_input
 
-class MidiInput(BaseInput):
+class MidiInput(base_input.BaseInput):
     """Input device that reads messages from a MIDI device."""
 
     def __init__(self, name="", portname="vibrance"):
@@ -15,14 +15,16 @@ class MidiInput(BaseInput):
 
         Windows: Attempts to connect to a loopback port with the given name.
         """
-
         super().__init__(name)
+        self.portname = portname
+        self.enabled = False
 
+    def open(self):
         if os.name == "posix":
-            self.midi = mido.open_input(name, virtual=True)
+            self.midi = mido.open_input(self.portname, virtual=True)
         elif os.name == "nt":
             try:
-                self.midi = mido.open_input(f"{name} 3")
+                self.midi = mido.open_input(f"{self.portname} 3")
             except OSError as e:
                 raise OSError("It looks like you're trying to use Vibrance's "
                               "MIDI interface on a Windows device. Vibrance "
@@ -34,9 +36,16 @@ class MidiInput(BaseInput):
         else:
             raise ValueError("unsupported OS")
 
-        atexit.register(self.midi.close)
+        atexit.register(self.close)
+        self.enabled = True
+
+    def close(self):
+        self.enabled = False
+        self.midi.close()
 
     def read(self):
+        if not self.enabled:
+            return tuple()
         events = []
         for msg in self.midi.iter_pending():
             if msg.type not in ("note_on", "note_off"):

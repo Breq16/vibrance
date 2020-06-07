@@ -2,15 +2,19 @@ import curses
 import atexit
 import string
 
+from . import base_input
 
-class KeypadInput:
+class KeypadInput(base_input.BaseInput):
     """Input device that reads keystrokes from the keyboard in a terminal
     window. Works on posix (Linux/MacOS) platforms only."""
 
-    def __init__(self):
+    def __init__(self, name=""):
+        super().__init__(name)
+        self.ready = False
+
+    def open(self):
         """Creates a KeypadInput that receives keystrokes from the current
         window."""
-
         self.scr = curses.initscr()
         curses.noecho()
         curses.cbreak()
@@ -19,9 +23,11 @@ class KeypadInput:
         atexit.register(self.close)
         self.scr.addstr(1, 1, "Vibrance: Keypad Input")
         self.scr.refresh()
+        self.ready = True
 
     def close(self):
         """Resets the terminal state."""
+        self.ready = False
         self.scr.nodelay(False)
         self.scr.keypad(False)
         curses.nocbreak()
@@ -29,6 +35,8 @@ class KeypadInput:
         curses.endwin()
 
     def read(self):
+        if not self.ready:
+            return tuple()
         events = []
         while True:
             try:

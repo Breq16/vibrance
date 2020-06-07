@@ -9,12 +9,10 @@ manager.connect(sys.argv[1], sys.argv[2])
 import vibrance.input.midi
 import vibrance.input.pygame_if
 
-manager.addInput(vibrance.input.midi.MidiInput(), "MIDI")
-manager.addInput(vibrance.input.pygame_if.PyGameInput(), "PyGame")
+manager.addInput(vibrance.input.midi.MidiInput("Vibrance MIDI"))
+manager.addInput(vibrance.input.pygame_if.PyGameInput("PyGame Keyboard"))
 
-manager.addScript("midi/simple.py", "MIDI Simple")
-manager.addScript("midi/animations.py", "MIDI Animations")
-manager.addScript("pygame_simple.py", "PyGame Simple")
+manager.addScriptsFromDirectory("manager/scripts")
 
 while True:
     print("Select input:")
