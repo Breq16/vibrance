@@ -17,7 +17,7 @@ PALETTE = (
 
 ZONES = list(range(6))
 
-api = vibrance.Interface()
+api = vibrance.Interface("Broken Pipe") # haha, because it's the pipe input demo, and it's kinda broken...
 
 @api.on("pipe", "cycle")
 def cycle(event):

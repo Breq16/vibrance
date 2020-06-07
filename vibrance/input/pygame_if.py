@@ -10,21 +10,21 @@ class PyGameInput(pipe.PipeInput):
         super().__init__(name, input_type="pygame")
 
     def open(self):
-        pygame_proc = multiprocessing.Process(target=self.runApp)
-        pygame_proc.start()
+        self.proc = multiprocessing.Process(target=self.runApp)
+        self.proc.start()
         super().open()
 
     def close(self):
         super().close()
-        pygame_proc.terminate()
-        pygame_proc.close()
-        pygame_proc = None
+        self.proc.terminate()
+        self.proc.close()
+        self.proc = None
 
     def runApp(self):
         pygame.init()
         color = "000000"
 
-        screen = pygame.display.set_mode((1000, 500))
+        screen = pygame.display.set_mode((50, 50))
         pygame.display.set_caption("Vibrance")
         clock = pygame.time.Clock()
 

@@ -19,7 +19,7 @@ color = PALETTE[0]
 
 enabled = {zone: False for zone in range(6)}
 
-api = vibrance.Interface()
+api = vibrance.Interface("Keypad Simple")
 
 def recompute():
     global color, enabled

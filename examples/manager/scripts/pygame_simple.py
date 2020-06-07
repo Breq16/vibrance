@@ -20,7 +20,7 @@ PALETTE = (
 
 color = "000000"
 
-api = vibrance.Interface()
+api = vibrance.Interface("PyGame Example")
 
 enabled = {zone: False for zone in range(6)}
 
@@ -105,7 +105,7 @@ def update():
 
 if __name__ == "__main__":
     import vibrance.input.pygame_if
-    
+
     ctrl = vibrance.Controller()
     ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
 
