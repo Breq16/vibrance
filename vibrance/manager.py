@@ -30,10 +30,10 @@ class Manager:
         sys.modules[spec.name] = driver_module
         spec.loader.exec_module(driver_module)
 
-        if not driver_module.driver.name:
-            driver_module.driver.name = specname
-
-        self.drivers[driver_module.driver.name] = driver_module.driver
+        for i, driver in enumerate(driver_module.drivers):
+            if not driver.name:
+                driver.name = f"{specname}_{i}"
+            self.drivers[driver.name] = driver
 
     def addScript(self, path):
         specname = f"manager_script_{len(self.scripts)}"
