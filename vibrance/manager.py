@@ -21,6 +21,19 @@ class Manager:
     def addInput(self, input):
         self.inputs[input.name] = input
 
+    def addInputFile(self, path):
+        specname = f"manager_input_{len(self.inputs)}"
+
+        spec = importlib.util.spec_from_file_location(specname, path)
+        input = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = input
+        spec.loader.exec_module(input)
+
+        if not input.input.name:
+            input.input.name = specname
+
+        self.inputs[input.input.name] = input.input
+
     def addScript(self, path):
         specname = f"manager_script_{len(self.scripts)}"
 
@@ -32,13 +45,16 @@ class Manager:
         if not script.api.name:
             script.api.name = specname
 
-        self.scripts[script.api.name] = script
+        self.scripts[script.api.name] = script.api
 
     def configure(self, path=None):
-        pass
+        self.addInputsFromDirectory(os.path.join(path, "inputs"))
+        self.addScriptsFromDirectory(os.path.join(path, "scripts"))
 
     def addInputsFromDirectory(self, path):
         files = [os.path.join(path, file) for file in os.listdir(path) if file.endswith(".py")]
+        for file in files:
+            self.addInputFile(file)
 
     def addScriptsFromDirectory(self, path):
         files = [os.path.join(path, file) for file in os.listdir(path) if file.endswith(".py")]
@@ -58,7 +74,7 @@ class Manager:
         return {}
 
     def handle(self):
-        self.script.api.handle(self.input, self.ctrl)
+        self.script.handle(self.input, self.ctrl)
 
     def run(self):
         while True:

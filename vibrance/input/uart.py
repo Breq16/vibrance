@@ -1,12 +1,16 @@
 import serial
+import serial.tools.list_ports
 import atexit
 
 from . import base_input
 
+def list_ports():
+    return [port.device for port in serial.tools.list_ports.comports()]
+
 class SerialInput(base_input.BaseInput):
     """Input device that reads bytes from a serial port."""
 
-    def __init__(self, name="", port):
+    def __init__(self, name="", port=""):
         """Creates a SerialInput that reads from the given port."""
         super().__init__(name)
         self.enabled = False
