@@ -14,37 +14,23 @@
     <div class="menu">
       <label for="input_type">Type: </label>
       <select name="input_type" id="input_type">
-        <option value="MIDI">MIDI</option>
-        <option value="UART">UART</option>
-        <option value="PyGame">PyGame</option>
+        {% for name in manager.inputs.keys() %}
+        <option value="{{ name }}">{{ name }}</option>
+        {% endfor %}
       </select>
       <br><br>
-      <div id="MIDI-settings" style="display: block">
-        <label for="midi_name">MIDI Device Name: </label>
-        <input type="text" id="input_name">
-      </div>
-      <div id="UART-settings" style="display: none">
-        <label for="serial_port">Serial Port: </label>
-        <select name="serial_port" id="serial_port">
-          <option value="/dev/ttyUSB0">/dev/ttyUSB0</option>
-          <option value="/dev/ttyUSB1">/dev/ttyUSB1</option>
-          <option value="/dev/ttyS0">/dev/ttyS0</option>
-        </select>
-      </div>
-      <br>
-      <button type="button">Connect</button>
-
+      <button type="button" id="inputButton">Select</button>
     </div>
 
     <div class="menu">
       <label for="script">Script: </label>
       <select name="script" id="script">
-        <option value="big_brain_v0.py">Big Brain v0</option>
-        <option value="rbtl.py">Read Between The Lines</option>
-        <option value="simplefx.py">Simple Effects</option>
+        {% for name in manager.scripts.keys() %}
+        <option value="{{ name }}">{{ name }}</option>
+        {% endfor %}
       </select>
       <br><br>
-      <button type="button">Run</button>
+      <button type="button" id="scriptButton">Select</button>
     </div>
     <div class="menu">
       <label for="relayHost">Relay IP: </label>

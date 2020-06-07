@@ -47,7 +47,7 @@ class Manager:
 
         self.scripts[script.api.name] = script.api
 
-    def configure(self, path=None):
+    def configure(self, path):
         self.addInputsFromDirectory(os.path.join(path, "inputs"))
         self.addScriptsFromDirectory(os.path.join(path, "scripts"))
 
