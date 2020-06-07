@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VIBRANCE | Multi-Zone Stress Test</title>
+
+    <style>
+    iframe {
+        width: 95px;
+        height: 65px;
+    }
+    </style>
+</head>
+<body>
+    <table>
+      {% for row in range(6) %}
+        <tr>
+          {% for col in range(6) %}
+            <td><iframe src="app.html?host={{ host }}&zone=0">
+            </iframe></td>
+          {% endfor %}
+          {% for col in range(6, 12) %}
+            <td><iframe src="app.html?host={{ host }}&zone=1">
+            </iframe></td>
+          {% endfor %}
+          {% for col in range(12, 18) %}
+            <td><iframe src="app.html?host={{ host }}&zone=2">
+            </iframe></td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+      {% for row in range(6, 12) %}
+        <tr>
+          {% for col in range(6) %}
+            <td><iframe src="app.html?host={{ host }}&zone=4">
+            </iframe></td>
+          {% endfor %}
+          {% for col in range(6, 12) %}
+            <td><iframe src="app.html?host={{ host }}&zone=5">
+            </iframe></td>
+          {% endfor %}
+          {% for col in range(12, 18) %}
+            <td><iframe src="app.html?host={{ host }}&zone=6">
+            </iframe></td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+
+</body>
+</html>

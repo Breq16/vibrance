@@ -1,14 +1,12 @@
 import logging
 
-logging.basicConfig(level=logging.CRITICAL)
-
 class Interface:
     """Provides a user-friendly API for creating color messages and launching
     user functions based on input."""
 
     def __init__(self, name=""):
         self.name = name
-        
+
         self.clear()
         self.callbacks = {}
         self.onTelemetryCallback = None

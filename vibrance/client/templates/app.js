@@ -14,12 +14,11 @@ function setColor(color) {
 
 function runApp() {
     var socket;
-    var port = 9000;
     if (urlParams.get("ssl") === "0") {
-        socket = new WebSocket("ws://"+urlParams.get("host")+":"+port,
+        socket = new WebSocket("ws://"+urlParams.get("host")+":9000",
                                "binary");
     } else {
-        socket = new WebSocket("wss://"+urlParams.get("host")+":"+port, "binary");
+        socket = new WebSocket("wss://"+urlParams.get("host")+":9000", "binary");
     }
     socket.binaryType = "arraybuffer";
 
