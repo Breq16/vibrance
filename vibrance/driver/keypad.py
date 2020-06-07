@@ -2,9 +2,9 @@ import curses
 import atexit
 import string
 
-from . import base_input
+from . import base
 
-class KeypadInput(base_input.BaseInput):
+class KeypadDriver(base.BaseDriver):
     """Input device that reads keystrokes from the keyboard in a terminal
     window. Works on posix (Linux/MacOS) platforms only."""
 
@@ -53,15 +53,15 @@ class KeypadInput(base_input.BaseInput):
             else:
                 key_type = "special"
 
-            events.append({"input": "keypad",
+            events.append({"driver": "keypad",
                            "type": "keydown",
                            "key": key})
 
-            events.append({"input": "keypad",
+            events.append({"driver": "keypad",
                            "type": key_type,
                            "key": key})
 
-            events.append({"input": "keypad",
+            events.append({"driver": "keypad",
                            "type": f"key_{key}",
                            "key": key})
 

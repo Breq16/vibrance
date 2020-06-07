@@ -22,10 +22,10 @@ def staticfile():
 def staticjs():
     return send_file("templates/index.js")
 
-@app.route("/input", methods=["POST"])
-def input():
+@app.route("/driver", methods=["POST"])
+def driver():
     data = request.json
-    manager.chooseInput(manager.inputs[data["input"]])
+    manager.chooseDriver(manager.drivers[data["driver"]])
     return ""
 
 @app.route("/script", methods=["POST"])

@@ -62,22 +62,22 @@ class Interface:
             self.onTelemetryCallback(telemetry)
         self.clear()
 
-    def on(self, input, event):
-        if input not in self.callbacks:
-            self.callbacks[input] = {}
+    def on(self, driver, event):
+        if driver not in self.callbacks:
+            self.callbacks[driver] = {}
         def decorator(func):
-            self.logger.info("Registering %s for callback %s, %s", func, input, event)
-            self.callbacks[input][event] = func
+            self.logger.info("Registering %s for callback %s, %s", func, driver, event)
+            self.callbacks[driver][event] = func
             return func
         return decorator
 
-    def handle(self, input, ctrl):
-        for event in input.read():
-            if event["input"] in self.callbacks:
-                if event["type"] in self.callbacks[event["input"]]:
-                    self.callbacks[event["input"]][event["type"]](event)
+    def handle(self, driver, ctrl):
+        for event in driver.read():
+            if event["driver"] in self.callbacks:
+                if event["type"] in self.callbacks[event["driver"]]:
+                    self.callbacks[event["driver"]][event["type"]](event)
                     self.update(ctrl)
 
-    def run(self, input, ctrl):
+    def run(self, driver, ctrl):
         while True:
-            self.handle(input, ctrl)
+            self.handle(driver, ctrl)

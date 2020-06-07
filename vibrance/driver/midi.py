@@ -3,9 +3,9 @@ import atexit
 
 import mido
 
-from . import base_input
+from . import base
 
-class MidiInput(base_input.BaseInput):
+class MidiDriver(base.BaseDriver):
     """Input device that reads messages from a MIDI device."""
 
     def __init__(self, name="", portname="vibrance"):
@@ -56,22 +56,22 @@ class MidiInput(base_input.BaseInput):
                            "channel": msg.channel,
                            "time": msg.time}
 
-            events.append({"input": "midi",
+            events.append({"driver": "midi",
                            "type": msg.type, **event_attrs})
 
-            events.append({"input": "midi",
+            events.append({"driver": "midi",
                            "type": f"{msg.type}_{msg.note}", **event_attrs})
 
             octave = msg.note // 12 - 2
 
-            events.append({"input": "midi",
+            events.append({"driver": "midi",
                            "type": f"{msg.type}_oct_{octave}", **event_attrs})
 
         return tuple(events)
 
 if __name__ == "__main__":
     # Run this module directly to run midi composer utility
-    
+
     # Find Vibrance Port
     if os.name == "posix":
         # macOS or Linux systems

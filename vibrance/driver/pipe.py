@@ -1,14 +1,14 @@
 import multiprocessing
 
-from . import base_input
+from . import base
 
-class PipeInput(base_input.BaseInput):
+class PipeDriver(base.BaseDriver):
     """Input device that reads commands in a separate thread."""
 
-    def __init__(self, name="", input_type="pipe"):
+    def __init__(self, name="", driver_type="pipe"):
         """Creates a PipeInput."""
         super().__init__(name)
-        self.input_type = input_type
+        self.driver_type = driver_type
 
         self.in_pipe, self.out_pipe = multiprocessing.Pipe()
 
@@ -30,7 +30,7 @@ class PipeInput(base_input.BaseInput):
         while self.out_pipe.poll():
             event_type, event_attrs = self.out_pipe.recv()
 
-            events.append({"input": self.input_type,
+            events.append({"driver": self.driver_type,
                            "type": event_type, **event_attrs})
 
         return tuple(events)

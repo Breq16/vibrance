@@ -1,4 +1,4 @@
-class BaseInput:
+class BaseDriver:
     def __init__(self, name=""):
         self.name = name
 

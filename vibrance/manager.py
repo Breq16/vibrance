@@ -4,35 +4,36 @@ import importlib
 import importlib.util
 
 from . import controller
+from . import interface
+from .driver import base
 
 
 class Manager:
     def __init__(self):
         self.ctrl = controller.Controller()
-        self.inputs = {}
-        self.inputTypes = {}
-        self.scripts = {}
-        self.input = None
-        self.script = None
+        self.drivers = {"None": base.BaseDriver("None")}
+        self.scripts = {"None": interface.Interface("None")}
+        self.driver = self.drivers["None"]
+        self.script = self.scripts["None"]
 
     def connect(self, host, psk=None):
         self.ctrl.connect(host, psk)
 
-    def addInput(self, input):
-        self.inputs[input.name] = input
+    def addDriver(self, driver):
+        self.drivers[driver.name] = driver
 
-    def addInputFile(self, path):
-        specname = f"manager_input_{len(self.inputs)}"
+    def addDriverFile(self, path):
+        specname = f"manager_driver_{len(self.drivers)}"
 
         spec = importlib.util.spec_from_file_location(specname, path)
-        input = importlib.util.module_from_spec(spec)
-        sys.modules[spec.name] = input
-        spec.loader.exec_module(input)
+        driver_module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = driver_module
+        spec.loader.exec_module(driver_module)
 
-        if not input.input.name:
-            input.input.name = specname
+        if not driver_module.driver.name:
+            driver_module.driver.name = specname
 
-        self.inputs[input.input.name] = input.input
+        self.drivers[driver_module.driver.name] = driver_module.driver
 
     def addScript(self, path):
         specname = f"manager_script_{len(self.scripts)}"
@@ -48,24 +49,24 @@ class Manager:
         self.scripts[script.api.name] = script.api
 
     def configure(self, path):
-        self.addInputsFromDirectory(os.path.join(path, "inputs"))
+        self.addDriversFromDirectory(os.path.join(path, "drivers"))
         self.addScriptsFromDirectory(os.path.join(path, "scripts"))
 
-    def addInputsFromDirectory(self, path):
+    def addDriversFromDirectory(self, path):
         files = [os.path.join(path, file) for file in os.listdir(path) if file.endswith(".py")]
         for file in files:
-            self.addInputFile(file)
+            self.addDriverFile(file)
 
     def addScriptsFromDirectory(self, path):
         files = [os.path.join(path, file) for file in os.listdir(path) if file.endswith(".py")]
         for file in files:
             self.addScript(file)
 
-    def chooseInput(self, input):
-        if self.input:
-            self.input.close()
-        self.input = input
-        self.input.open()
+    def chooseDriver(self, driver):
+        if self.driver:
+            self.driver.close()
+        self.driver = driver
+        self.driver.open()
 
     def chooseScript(self, script):
         self.script = script
@@ -75,7 +76,7 @@ class Manager:
 
     def handle(self):
         if self.script:
-            self.script.handle(self.input, self.ctrl)
+            self.script.handle(self.driver, self.ctrl)
 
     def run(self):
         while True:
@@ -88,11 +89,11 @@ if __name__ == "__main__":
     manager.connect(sys.argv[1], sys.argv[2])
     manager.configure(sys.argv[3])
 
-    def promptInput():
-        print("Select input:")
-        for name in manager.inputs.keys():
+    def promptDriver():
+        print("Select driver:")
+        for name in manager.drivers.keys():
             print(name)
-        manager.chooseInput(manager.inputs[input("> ")])
+        manager.chooseDriver(manager.drivers[input("> ")])
 
     def promptScript():
         print("Select script:")
@@ -100,7 +101,7 @@ if __name__ == "__main__":
             print(name)
         manager.chooseScript(manager.scripts[input("> ")])
 
-    promptInput()
+    promptDriver()
     promptScript()
 
     while True:
@@ -110,5 +111,5 @@ if __name__ == "__main__":
             try:
                 promptScript()
             except KeyboardInterrupt:
-                promptInput()
+                promptDriver()
                 promptScript()

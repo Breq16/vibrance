@@ -1,16 +1,16 @@
 window.onload = function() {
 
-  var inputButton = document.getElementById("inputButton")
+  var driverButton = document.getElementById("driverButton")
   var scriptButton = document.getElementById("scriptButton")
   var relayButton = document.getElementById("relayButton")
 
-  inputButton.onclick = function() {
-    var inputName = document.getElementById("input_type")
-    var data = {"input": inputName.value}
+  driverButton.onclick = function() {
+    var driverName = document.getElementById("driver_type")
+    var data = {"driver": driverName.value}
 
     var request = new XMLHttpRequest()
     request.onreadystatechange = function() {}
-    request.open("POST", "/input", true)
+    request.open("POST", "/driver", true)
     request.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
     request.send(JSON.stringify(data))
   }

@@ -2,12 +2,12 @@ import serial
 import serial.tools.list_ports
 import atexit
 
-from . import base_input
+from . import base
 
 def list_ports():
     return [port.device for port in serial.tools.list_ports.comports()]
 
-class SerialInput(base_input.BaseInput):
+class SerialDriver(base.BaseDriver):
     """Input device that reads bytes from a serial port."""
 
     def __init__(self, name="", port=""):
@@ -31,11 +31,11 @@ class SerialInput(base_input.BaseInput):
         while self.port.in_waiting > 0:
             byte = self.port.read().decode("utf-8")
 
-            events.append({"input": "uart",
+            events.append({"driver": "uart",
                            "type": "byte",
                            "byte": byte})
 
-            events.append({"input": "uart",
+            events.append({"driver": "uart",
                            "type": byte,
                            "byte": byte})
 

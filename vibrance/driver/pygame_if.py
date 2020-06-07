@@ -5,9 +5,9 @@ import pygame
 from . import pipe
 
 
-class PyGameInput(pipe.PipeInput):
+class PyGameDriver(pipe.PipeDriver):
     def __init__(self, name=""):
-        super().__init__(name, input_type="pygame")
+        super().__init__(name, driver_type="pygame")
 
     def open(self):
         self.proc = multiprocessing.Process(target=self.runApp)

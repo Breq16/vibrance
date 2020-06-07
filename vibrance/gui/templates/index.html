@@ -7,19 +7,19 @@
 </head>
 <body>
   <div class="grid">
-    <div class="label">Input</div>
+    <div class="label">Driver</div>
     <div class="label">Script</div>
     <div class="label">Relay</div>
 
     <div class="menu">
-      <label for="input_type">Type: </label>
-      <select name="input_type" id="input_type">
-        {% for name in manager.inputs.keys() %}
+      <label for="driver_type">Type: </label>
+      <select name="driver_type" id="driver_type">
+        {% for name in manager.drivers.keys() %}
         <option value="{{ name }}">{{ name }}</option>
         {% endfor %}
       </select>
       <br><br>
-      <button type="button" id="inputButton">Select</button>
+      <button type="button" id="driverButton">Select</button>
     </div>
 
     <div class="menu">
