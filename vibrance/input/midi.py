@@ -3,17 +3,20 @@ import atexit
 
 import mido
 
+from base_input import BaseInput
 
-class MidiInput:
+class MidiInput(BaseInput):
     """Input device that reads messages from a MIDI device."""
 
-    def __init__(self, name="vibrance"):
+    def __init__(self, name="", portname="vibrance"):
         """Creates a MidiInput that receives messages from the given port.
 
         Linux/MacOS: Creates a virtual input port with the given name.
 
         Windows: Attempts to connect to a loopback port with the given name.
         """
+
+        super().__init__(name)
 
         if os.name == "posix":
             self.midi = mido.open_input(name, virtual=True)

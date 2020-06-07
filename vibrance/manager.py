@@ -1,4 +1,6 @@
+import os
 import sys
+import importlib
 import importlib.util
 
 from . import controller
@@ -8,6 +10,7 @@ class Manager:
     def __init__(self):
         self.ctrl = controller.Controller()
         self.inputs = {}
+        self.inputTypes = {}
         self.scripts = {}
         self.input = None
         self.script = None
@@ -18,10 +21,7 @@ class Manager:
     def addInput(self, input, name):
         self.inputs[name] = input
 
-    def addScript(self, path, name=None):
-        if name is None:
-            name = path
-
+    def addScript(self, path):
         specname = f"manager_script_{len(self.scripts)}"
 
         spec = importlib.util.spec_from_file_location(specname, path)
@@ -29,7 +29,21 @@ class Manager:
         sys.modules[spec.name] = script
         spec.loader.exec_module(script)
 
-        self.scripts[name] = script
+        if not script.api.name:
+            script.api.name = specname
+
+        self.scripts[script.api.name] = script
+
+    def configure(self, path=None):
+        pass
+
+    def addInputsFromDirectory(self, path):
+        files = [file for file in os.path.listdir(path) if file.endswith(".py")]
+
+    def addScriptsFromDirectory(self, path):
+        files = [file for file in os.path.listdir(path) if file.endswith(".py")]
+        for file in files:
+            self.addScript(file)
 
     def chooseInput(self, input):
         self.input = input
