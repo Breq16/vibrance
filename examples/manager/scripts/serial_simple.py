@@ -48,14 +48,3 @@ def any(event):
 @api.onTelemetry
 def onTelemetry(telemetry):
     print(telemetry)
-
-if __name__ == "__main__":
-    import sys
-    import vibrance.input.uart
-
-    ctrl = vibrance.Controller()
-    ctrl.connect(sys.argv[1], sys.argv[2])
-
-    uart = vibrance.input.uart.SerialInput(sys.argv[3])
-
-    api.run(uart, ctrl)

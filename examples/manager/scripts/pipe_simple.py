@@ -54,33 +54,3 @@ def clear(event):
 @api.onTelemetry
 def onTelemetry(telemetry):
     print(telemetry)
-
-if __name__ == "__main__":
-    import sys
-    import multiprocessing
-    import vibrance.input.pipe
-    import tkinter as tk
-
-    ctrl = vibrance.Controller()
-    ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
-
-    pipe = vibrance.input.pipe.PipeInput()
-
-    api_proc = multiprocessing.Process(target=api.run, args=(pipe, ctrl))
-    api_proc.start()
-
-    root = tk.Tk()
-
-    cycleButton = tk.Button(text="cycle",
-                            command=lambda: pipe.launch("cycle", {"color": 6}))
-    cycleButton.pack()
-
-    chaseButton = tk.Button(text="chase",
-                            command=lambda: pipe.launch("chase", {"color": 7}))
-    chaseButton.pack()
-
-    clearButton = tk.Button(text="clear",
-                            command=lambda: pipe.launch("clear"))
-    clearButton.pack()
-
-    tk.mainloop()

@@ -52,14 +52,3 @@ def test(event):
 @api.onTelemetry
 def onTelemetry(telemetry):
     print(telemetry)
-
-if __name__ == "__main__":
-    import sys
-    import vibrance.input.midi
-
-    ctrl = vibrance.Controller()
-    ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
-
-    min = vibrance.input.midi.MidiInput("vibrance")
-
-    api.run(min, ctrl)

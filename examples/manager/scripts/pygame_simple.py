@@ -102,13 +102,3 @@ def update():
     global color
     for zone in enabled.keys():
         api.color(zone, color if enabled[zone] else "000")
-
-if __name__ == "__main__":
-    import vibrance.input.pygame_if
-
-    ctrl = vibrance.Controller()
-    ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
-
-    pygame_in = vibrance.input.pygame_if.PyGameInput()
-
-    api.run(pygame_in, ctrl)

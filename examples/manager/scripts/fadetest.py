@@ -32,12 +32,3 @@ def mainloop():
         frame += 1
     ts = time.time()
     time.sleep(1 + ts - time.time())
-
-if __name__ == "__main__":
-    import sys
-
-    ctrl = vibrance.Controller()
-    ctrl.connect(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
-
-    while True:
-        mainloop(ctrl)
