@@ -1,11 +1,10 @@
 window.onload = function() {
 
-  var driverButton = document.getElementById("driverButton")
-  var scriptButton = document.getElementById("scriptButton")
+  var driverName = document.getElementById("driver_type")
+  var scriptName = document.getElementById("script")
   var relayButton = document.getElementById("relayButton")
 
-  driverButton.onclick = function() {
-    var driverName = document.getElementById("driver_type")
+  function updateDriver() {
     var data = {"driver": driverName.value}
 
     var request = new XMLHttpRequest()
@@ -15,8 +14,10 @@ window.onload = function() {
     request.send(JSON.stringify(data))
   }
 
-  scriptButton.onclick = function() {
-    var scriptName = document.getElementById("script")
+  updateDriver()
+  driverName.onchange = updateDriver
+
+  function updateScript() {
     var data = {"script": scriptName.value}
 
     var request = new XMLHttpRequest()
@@ -25,6 +26,9 @@ window.onload = function() {
     request.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
     request.send(JSON.stringify(data))
   }
+
+  updateScript()
+  scriptName.onchange = updateScript
 
   relayButton.onclick = function() {
     var relayInput = document.getElementById("relayHost")
