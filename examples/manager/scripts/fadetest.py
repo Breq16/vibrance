@@ -4,7 +4,7 @@ import sys
 
 import vibrance
 
-api = vibrance.Interface()
+api = vibrance.Interface("Fadetest")
 
 def getColor(radians):
     red = 0x80 + int(0x79*math.sin(radians))
@@ -18,7 +18,8 @@ def onTelemetry(telemetry):
 
 frame = 0
 
-def mainloop(ctrl):
+@api.loop
+def mainloop():
     global frame
     api.clear()
     for i in range(20):
@@ -30,7 +31,6 @@ def mainloop(ctrl):
         api.add(5, getColor(frame/50+math.pi*5/3), delay=i*50)
         frame += 1
     ts = time.time()
-    api.update(ctrl)
     time.sleep(1 + ts - time.time())
 
 if __name__ == "__main__":

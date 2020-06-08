@@ -35,6 +35,9 @@ class Controller:
         Returns performance data from both the relay server and local
         measurements."""
 
+        if not self.enabled:
+            return {}
+        
         self.socket.repair()
 
         timestamp = time.time()

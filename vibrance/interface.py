@@ -9,6 +9,7 @@ class Interface:
 
         self.clear()
         self.callbacks = {}
+        self.loopCallback = None
         self.onTelemetryCallback = None
 
         self.logger = logging.getLogger(__name__)
@@ -71,7 +72,15 @@ class Interface:
             return func
         return decorator
 
+    def loop(self, func):
+        self.logger.info("Registering %s as a loop function", func)
+        self.loopCallback = func
+        return func
+
     def handle(self, driver, ctrl):
+        if self.loopCallback:
+            self.loopCallback()
+            self.update(ctrl)
         for event in driver.read():
             if event["driver"] in self.callbacks:
                 if event["type"] in self.callbacks[event["driver"]]:
