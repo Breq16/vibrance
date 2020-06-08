@@ -56,16 +56,8 @@ class Controller:
         self.enabled = False
 
     def getStatus(self):
-        status = {}
-
         if self.enabled:
-            if self.socket.socket:
-                status["health"] = "success"
-                status["message"] = f"Connected to {self.relay}"
-            else:
-                status["health"] = "warning"
-                status["message"] = f"Connection to {self.relay} lost"
+            return self.socket.getStatus()
         else:
-            status["health"] = "inactive"
-            status["message"] = "Not Connected"
+            status = {"health": "inactive", "message": "Not Connected"}
         return status

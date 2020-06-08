@@ -9,6 +9,9 @@ class TolerantSocket:
         self.logger.setLevel(debug_level)
         self.logger.info("Created tolerant socket")
 
+        self.health = "inactive"
+        self.message = "Not Connected"
+
     def connect(self, host, port, psk=None, ssl_context=None):
         self.logger.info("Set target at %s:%i", host, port)
         self.host = host
@@ -31,31 +34,47 @@ class TolerantSocket:
 
         try:
             self.socket.connect((self.host, self.port))
-        except (ConnectionError, socket.timeout) as e:
-            self.logger.error("Connection failed: %s", e)
-            self.socket.close()
-            self.socket = None
+        except ConnectionError:
+            self.close(f"Connection to {self.host} failed")
+        except socket.timeout:
+            self.close(f"Connection to {self.host} timed out")
+        except socket.gaierror:
+            self.close(f"{self.host} is not a valid address")
+        else:
+            if self.psk:
+                if self.authenticate():
+                    self.health = "success"
+                    self.message = f"Connected to {self.host}"
+            else:
+                self.health = "success"
+                self.message = f"Connected to {self.host}"
 
-        if self.psk and self.socket:
-            self.logger.info("Attempting auth...")
-            self.send(self.psk.encode("utf-8"))
-            if self.socket:
-                ret = self.recv(1024)
-                if self.socket:
-                    if ret == b"OK":
-                        return
-                    else:
-                        self.socket.close()
-                        self.socket = None
+    def authenticate(self):
+        self.logger.info("Attempting auth...")
+        self.send(self.psk.encode("utf-8"))
+        if self.socket:
+            try:
+                data = self.socket.recv(1024)
+            except ConnectionError:
+                self.close(f"Connection to {self.host} failed")
+            except socket.timeout:
+                self.close(f"Connection to {self.host} timed out")
+            else:
+                if data == b"OK":
+                    return True
+                else:
+                    self.close("Authentication failed")
+        return False
+
 
     def send(self, data):
         if self.socket:
             try:
                 self.socket.send(data)
-            except (ConnectionError, socket.timeout) as e:
-                self.logger.error("Send failed: %s", e)
-                self.socket.close()
-                self.socket = None
+            except ConnectionError:
+                self.close(f"Connection to {self.host} failed")
+            except socket.timeout:
+                self.close(f"Connection to {self.host} timed out")
             else:
                 self.logger.debug("Send successful")
         else:
@@ -67,13 +86,11 @@ class TolerantSocket:
                 data = self.socket.recv(length)
             except (ConnectionError, socket.timeout) as e:
                 self.logger.error("Recv failed: %s", e)
-                self.socket.close()
-                self.socket = None
+                self.close(f"Connection to {self.host} failed")
             else:
                 if len(data) == 0:
                     self.logger.error("Socket disconnected")
-                    self.socket.close()
-                    self.socket = None
+                    self.close(f"Connection to {self.host} failed")
                 else:
                     self.logger.debug("Recv successful, returned %s", data)
                     return data
@@ -92,23 +109,28 @@ class TolerantSocket:
                 data = data.decode("utf-8")
             except UnicodeDecodeError:
                 self.logger.error("Invalid UTF-8 received")
+                return None
             else:
                 try:
                     data = json.loads(data)
                 except json.JSONDecodeError:
                     self.logger.error("Invalid JSON received")
+                    return None
                 else:
                     return data
 
-    def close(self):
+    def close(self, reason=None):
         self.logger.info("Closing socket")
         if self.socket:
             self.socket.close()
             self.socket = None
 
-    @property
-    def connected(self):
-        if self.socket:
-            return True
+        if reason is not None:
+            self.health = "failure"
+            self.message = reason
         else:
-            return False
+            self.health = "inactive"
+            self.message = "Not Connected"
+
+    def getStatus(self):
+        return {"health": self.health, "message": self.message}
