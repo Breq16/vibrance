@@ -1,11 +1,13 @@
 import sys
 import threading
+import logging
 
 from flask import Flask, send_file, send_from_directory, request, jsonify, render_template
-
 from .. import manager
 
 app = Flask(__name__)
+
+logging.getLogger("werkzeug").setLevel(logging.WARNING)
 
 manager = manager.Manager()
 manager.configure(sys.argv[1])

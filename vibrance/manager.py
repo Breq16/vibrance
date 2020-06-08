@@ -81,35 +81,3 @@ class Manager:
     def run(self):
         while True:
             self.handle()
-
-if __name__ == "__main__":
-    # Run this module directly for a CLI manager
-
-    manager = Manager()
-    manager.connect(sys.argv[1], sys.argv[2])
-    manager.configure(sys.argv[3])
-
-    def promptDriver():
-        print("Select driver:")
-        for name in manager.drivers.keys():
-            print(name)
-        manager.chooseDriver(manager.drivers[input("> ")])
-
-    def promptScript():
-        print("Select script:")
-        for name in manager.scripts.keys():
-            print(name)
-        manager.chooseScript(manager.scripts[input("> ")])
-
-    promptDriver()
-    promptScript()
-
-    while True:
-        try:
-            manager.run()
-        except KeyboardInterrupt:
-            try:
-                promptScript()
-            except KeyboardInterrupt:
-                promptDriver()
-                promptScript()
