@@ -10,18 +10,18 @@ def list_ports():
 class SerialDriver(base.BaseDriver):
     """Input device that reads bytes from a serial port."""
 
-    def __init__(self, name="", port=""):
+    def __init__(self, name="", portname=""):
         """Creates a SerialInput that reads from the given port."""
         super().__init__(name)
-        self.enabled = False
+        self.portname = portname
 
     def open(self):
-        self.port = serial.Serial(port)
+        self.port = serial.Serial(self.portname)
         atexit.register(self.close)
-        self.enabled = True
+        super().open()
 
     def close(self):
-        self.enabled = False
+        super().close()
         self.port.close()
 
     def read(self):
@@ -40,3 +40,15 @@ class SerialDriver(base.BaseDriver):
                            "byte": byte})
 
         return tuple(events)
+
+    def getStatus(self):
+        status = {}
+
+        if self.enabled:
+            status["health"] = "success"
+            status["message"] = "Serial Enabled"
+        else:
+            status["health"] = "inactive"
+            status["message"] = "Serial Disabled"
+
+        return status

@@ -17,6 +17,7 @@ class PyGameDriver(pipe.PipeDriver):
     def close(self):
         super().close()
         self.proc.terminate()
+        self.proc.join()
         self.proc.close()
         self.proc = None
 
@@ -44,3 +45,15 @@ class PyGameDriver(pipe.PipeDriver):
             clock.tick(30)
 
         pygame.quit()
+
+    def getStatus(self):
+        status = {}
+
+        if self.enabled:
+            status["health"] = "success"
+            status["message"] = "PyGame Enabled"
+        else:
+            status["health"] = "inactive"
+            status["message"] = "PyGame Disabled"
+
+        return status

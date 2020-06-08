@@ -90,3 +90,13 @@ class Interface:
     def run(self, driver, ctrl):
         while True:
             self.handle(driver, ctrl)
+
+    def getStatus(self):
+        status = {}
+        if self.name == "None":
+            status["health"] = "inactive"
+            status["message"] = "No Script"
+        else:
+            status["health"] = "success"
+            status["message"] = f"{self.name} loaded"
+        return status

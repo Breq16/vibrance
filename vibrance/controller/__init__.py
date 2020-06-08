@@ -16,6 +16,8 @@ class Controller:
         log into the relay using the password. If enable_ssl is provided,
         connect to the server using SSL."""
 
+        self.relay = relay
+
         if self.enabled:
             self.close()
 
@@ -37,7 +39,7 @@ class Controller:
 
         if not self.enabled:
             return {}
-        
+
         self.socket.repair()
 
         timestamp = time.time()
@@ -52,3 +54,18 @@ class Controller:
         self.socket.close()
         self.socket = None
         self.enabled = False
+
+    def getStatus(self):
+        status = {}
+
+        if self.enabled:
+            if self.socket.socket:
+                status["health"] = "success"
+                status["message"] = f"Connected to {self.relay}"
+            else:
+                status["health"] = "warning"
+                status["message"] = f"Connection to {self.relay} lost"
+        else:
+            status["health"] = "inactive"
+            status["message"] = "Not Connected"
+        return status

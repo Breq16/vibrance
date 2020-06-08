@@ -17,7 +17,6 @@ class MidiDriver(base.BaseDriver):
         """
         super().__init__(name)
         self.portname = portname
-        self.enabled = False
 
     def open(self):
         if os.name == "posix":
@@ -37,10 +36,10 @@ class MidiDriver(base.BaseDriver):
             raise ValueError("unsupported OS")
 
         atexit.register(self.close)
-        self.enabled = True
+        super().open()
 
     def close(self):
-        self.enabled = False
+        super().close()
         self.midi.close()
         self.midi = None
 
@@ -69,3 +68,15 @@ class MidiDriver(base.BaseDriver):
                            "type": f"{msg.type}_oct_{octave}", **event_attrs})
 
         return tuple(events)
+
+    def getStatus(self):
+        status = {}
+
+        if self.enabled:
+            status["health"] = "success"
+            status["message"] = "MIDI Enabled"
+        else:
+            status["health"] = "inactive"
+            status["message"] = "MIDI Disabled"
+
+        return status

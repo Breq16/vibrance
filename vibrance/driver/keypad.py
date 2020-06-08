@@ -10,7 +10,6 @@ class KeypadDriver(base.BaseDriver):
 
     def __init__(self, name=""):
         super().__init__(name)
-        self.ready = False
 
     def open(self):
         """Creates a KeypadInput that receives keystrokes from the current
@@ -23,11 +22,11 @@ class KeypadDriver(base.BaseDriver):
         atexit.register(self.close)
         self.scr.addstr(1, 1, "Vibrance: Keypad Input")
         self.scr.refresh()
-        self.ready = True
+        super().open()
 
     def close(self):
         """Resets the terminal state."""
-        self.ready = False
+        super().close()
         self.scr.nodelay(False)
         self.scr.keypad(False)
         curses.nocbreak()
@@ -35,7 +34,7 @@ class KeypadDriver(base.BaseDriver):
         curses.endwin()
 
     def read(self):
-        if not self.ready:
+        if not self.enabled:
             return tuple()
         events = []
         while True:
@@ -66,3 +65,15 @@ class KeypadDriver(base.BaseDriver):
                            "key": key})
 
         return tuple(events)
+
+    def getStatus(self):
+        status = {}
+
+        if self.enabled:
+            status["health"] = "success"
+            status["message"] = "Keypad Enabled"
+        else:
+            status["health"] = "inactive"
+            status["message"] = "Keypad Disabled"
+
+        return status

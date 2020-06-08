@@ -12,14 +12,6 @@ class PipeDriver(base.BaseDriver):
 
         self.in_pipe, self.out_pipe = multiprocessing.Pipe()
 
-        self.enabled = False
-
-    def open(self):
-        self.enabled = True
-
-    def close(self):
-        self.enabled = False
-
     def launch(self, event_type, obj={}):
         self.in_pipe.send((event_type, obj))
 
@@ -34,3 +26,15 @@ class PipeDriver(base.BaseDriver):
                            "type": event_type, **event_attrs})
 
         return tuple(events)
+
+    def getStatus(self):
+        status = {}
+
+        if self.enabled:
+            status["health"] = "success"
+            status["message"] = "Pipe Enabled"
+        else:
+            status["health"] = "inactive"
+            status["message"] = "Pipe Disabled"
+
+        return status

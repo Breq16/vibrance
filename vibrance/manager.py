@@ -63,8 +63,7 @@ class Manager:
             self.addScript(file)
 
     def chooseDriver(self, driver):
-        if self.driver:
-            self.driver.close()
+        self.driver.close()
         self.driver = driver
         self.driver.open()
 
@@ -72,11 +71,16 @@ class Manager:
         self.script = script
 
     def getStatus(self):
-        return {}
+        status = {}
+
+        status["driver"] = self.driver.getStatus()
+        status["script"] = self.script.getStatus()
+        status["relay"] = self.ctrl.getStatus()
+
+        return status
 
     def handle(self):
-        if self.script:
-            self.script.handle(self.driver, self.ctrl)
+        self.script.handle(self.driver, self.ctrl)
 
     def run(self):
         while True:

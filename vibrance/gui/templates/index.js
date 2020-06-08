@@ -42,6 +42,8 @@ window.onload = function() {
     request.send(JSON.stringify(data))
   }
 
+  var driverStatus = document.getElementById("driverStatus")
+  var scriptStatus = document.getElementById("scriptStatus")
   var relayStatus = document.getElementById("relayStatus")
 
   function updateStatus() {
@@ -49,7 +51,12 @@ window.onload = function() {
     request.onload = function() {
       var data = JSON.parse(request.response)
 
-      // TODO: do something with the data
+      driverStatus.className = data["driver"]["health"]
+      driverStatus.innerText = data["driver"]["message"]
+      scriptStatus.className = data["script"]["health"]
+      scriptStatus.innerText = data["script"]["message"]
+      relayStatus.className = data["relay"]["health"]
+      relayStatus.innerText = data["relay"]["message"]
 
       setTimeout(updateStatus, 1000)
     }
