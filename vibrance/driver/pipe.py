@@ -16,9 +16,7 @@ class PipeDriver(base.BaseDriver):
     def launch(self, event_type, obj={}):
         self.in_pipe.send((event_type, obj))
 
-    def read(self):
-        if not self.enabled:
-            return tuple()
+    def _read(self):
         events = []
         while self.out_pipe.poll():
             event_type, event_attrs = self.out_pipe.recv()

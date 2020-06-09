@@ -19,7 +19,7 @@ class MidiDriver(base.BaseDriver):
         super().__init__(name)
         self.portname = portname
 
-    def open(self):
+    def _open(self):
         if os.name == "posix":
             self.midi = mido.open_input(self.portname, virtual=True)
         elif os.name == "nt":
@@ -37,16 +37,12 @@ class MidiDriver(base.BaseDriver):
             raise ValueError("unsupported OS")
 
         atexit.register(self.close)
-        super().open()
 
-    def close(self):
-        super().close()
+    def _close(self):
         self.midi.close()
         self.midi = None
 
-    def read(self):
-        if not self.enabled:
-            return tuple()
+    def _read(self):
         events = []
         for msg in self.midi.iter_pending():
             if msg.type not in ("note_on", "note_off"):

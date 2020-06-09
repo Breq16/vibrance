@@ -17,18 +17,14 @@ class SerialDriver(base.BaseDriver):
         super().__init__(name)
         self.portname = portname
 
-    def open(self):
+    def _open(self):
         self.port = serial.Serial(self.portname)
         atexit.register(self.close)
-        super().open()
 
-    def close(self):
-        super().close()
+    def _close(self):
         self.port.close()
 
-    def read(self):
-        if not self.enabled:
-            return tuple()
+    def _read(self):
         events = []
         while self.port.in_waiting > 0:
             byte = self.port.read().decode("utf-8")

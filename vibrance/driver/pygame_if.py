@@ -9,13 +9,11 @@ class PyGameDriver(pipe.PipeDriver):
     def __init__(self, name=""):
         super().__init__(name, driver_type="pygame")
 
-    def open(self):
+    def _open(self):
         self.proc = multiprocessing.Process(target=self.runApp)
         self.proc.start()
-        super().open()
 
-    def close(self):
-        super().close()
+    def _close(self):
         self.proc.terminate()
         self.proc.join()
         self.proc.close()
