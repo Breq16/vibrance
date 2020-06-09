@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="vibrance",
-    version="0.0.2",
+    version="0.1.0",
     author="Wesley Chalmers",
     author_email="wesleyjchalmers@gmail.com",
     description="Crowd-based concert lighting system",
@@ -26,5 +26,7 @@ setuptools.setup(
         "midi": ["mido"],
         "relay": ["websockify"],
         "uart": ["pyserial"],
+        "pygame": ["pygame"],
+        "gui": ["flask"],
     }
 )

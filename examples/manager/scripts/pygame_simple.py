@@ -1,5 +1,4 @@
 import pygame
-import sys
 
 import vibrance
 
@@ -23,6 +22,7 @@ color = "000000"
 api = vibrance.Interface("PyGame Example")
 
 enabled = {zone: False for zone in range(6)}
+
 
 def setEnabled(key, state):
     global enabled
@@ -83,6 +83,7 @@ def changeColor(key):
     elif key == ord('v'):
         color = PALETTE[11]
 
+
 @api.on("pygame", "keydown")
 def keydown(event):
     key = event["key"]
@@ -93,10 +94,12 @@ def keydown(event):
         changeColor(key)
     update()
 
+
 @api.on("pygame", "keyup")
 def keyup(event):
     setEnabled(event["key"], False)
     update()
+
 
 def update():
     global color

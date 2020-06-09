@@ -21,6 +21,7 @@ enabled = {zone: False for zone in range(6)}
 
 api = vibrance.Interface("Keypad Simple")
 
+
 def recompute():
     global color, enabled
     for zone in enabled:
@@ -28,6 +29,7 @@ def recompute():
             api.color(zone, color)
         else:
             api.color(zone, "000")
+
 
 @api.on("keypad", "letter")
 def onLetter(event):
@@ -58,6 +60,7 @@ def onLetter(event):
     elif key == "v":
         color = PALETTE[11]
     recompute()
+
 
 @api.on("keypad", "number")
 def onNumber(event):

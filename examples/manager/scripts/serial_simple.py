@@ -17,6 +17,7 @@ PALETTE = (
 
 api = vibrance.Interface("Arduino Example")
 
+
 @api.on("uart", "a")
 def a(event):
     api.color(0, "FF0")
@@ -27,6 +28,7 @@ def a(event):
     api.wait(1)
     api.color(2, "FF0")
     api.color((0, 1), "000")
+
 
 @api.on("uart", "b")
 def b(event):
@@ -39,11 +41,13 @@ def b(event):
     api.color(5, "FF0")
     api.color((3, 4), "000")
 
+
 @api.on("uart", "byte")
 def any(event):
     i = int.from_bytes(event["byte"], "little")
     if 0 <= i < len(PALETTE):
         api.color(range(6), PALETTE[i])
+
 
 @api.onTelemetry
 def onTelemetry(telemetry):

@@ -5,6 +5,7 @@ import mido
 
 from . import base
 
+
 class MidiDriver(base.BaseDriver):
     """Input device that reads messages from a MIDI device."""
 

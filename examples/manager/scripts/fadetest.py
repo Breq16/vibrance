@@ -1,10 +1,10 @@
 import math
 import time
-import sys
 
 import vibrance
 
 api = vibrance.Interface("Fadetest")
+
 
 def getColor(radians):
     red = 0x80 + int(0x79*math.sin(radians))
@@ -12,11 +12,14 @@ def getColor(radians):
     blue = 0x80 + int(0x79*math.sin(radians+math.pi*4/3))
     return f"{format(red, '02x')}{format(green, '02x')}{format(blue, '02x')}"
 
+
 @api.onTelemetry
 def onTelemetry(telemetry):
     print(telemetry)
 
+
 frame = 0
+
 
 @api.loop
 def mainloop():

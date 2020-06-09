@@ -40,7 +40,8 @@ class PyGameDriver(pipe.PipeDriver):
                 elif event.type == pygame.KEYUP:
                     self.launch("keyup", {"key": event.key})
 
-            pygame.draw.rect(screen, pygame.Color("#"+color), (0, 0, 1000, 500))
+            pygame.draw.rect(screen, pygame.Color("#"+color),
+                             (0, 0, 1000, 500))
             pygame.display.flip()
             clock.tick(30)
 

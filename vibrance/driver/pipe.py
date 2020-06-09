@@ -2,6 +2,7 @@ import multiprocessing
 
 from . import base
 
+
 class PipeDriver(base.BaseDriver):
     """Input device that reads commands in a separate thread."""
 

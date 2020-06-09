@@ -1,5 +1,6 @@
 import logging
 
+
 class Interface:
     """Provides a user-friendly API for creating color messages and launching
     user functions based on input."""
@@ -66,8 +67,10 @@ class Interface:
     def on(self, driver, event):
         if driver not in self.callbacks:
             self.callbacks[driver] = {}
+
         def decorator(func):
-            self.logger.info("Registering %s for callback %s, %s", func, driver, event)
+            self.logger.info("Registering %s for callback %s, %s",
+                             func, driver, event)
             self.callbacks[driver][event] = func
             return func
         return decorator

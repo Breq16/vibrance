@@ -17,6 +17,7 @@ atexit.register(readline.write_history_file, histfile)
 
 api = vibrance.Interface("Terminal Composer")
 
+
 @api.loop
 def loop():
     i = input("Messages> ")

@@ -4,6 +4,7 @@ import string
 
 from . import base
 
+
 class KeypadDriver(base.BaseDriver):
     """Input device that reads keystrokes from the keyboard in a terminal
     window. Works on posix (Linux/MacOS) platforms only."""
@@ -40,7 +41,7 @@ class KeypadDriver(base.BaseDriver):
         while True:
             try:
                 key = self.scr.getkey()
-            except curses.error: # No input to process
+            except curses.error:  # No input to process
                 break
 
             if key in string.ascii_letters:

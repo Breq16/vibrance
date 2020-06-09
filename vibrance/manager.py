@@ -53,12 +53,14 @@ class Manager:
         self.addScriptsFromDirectory(os.path.join(path, "scripts"))
 
     def addDriversFromDirectory(self, path):
-        files = [os.path.join(path, file) for file in os.listdir(path) if file.endswith(".py")]
+        files = [os.path.join(path, file) for file in os.listdir(path)
+                 if file.endswith(".py")]
         for file in files:
             self.addDriverFile(file)
 
     def addScriptsFromDirectory(self, path):
-        files = [os.path.join(path, file) for file in os.listdir(path) if file.endswith(".py")]
+        files = [os.path.join(path, file) for file in os.listdir(path)
+                 if file.endswith(".py")]
         for file in files:
             self.addScript(file)
 

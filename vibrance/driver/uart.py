@@ -4,8 +4,10 @@ import atexit
 
 from . import base
 
+
 def list_ports():
     return [port.device for port in serial.tools.list_ports.comports()]
+
 
 class SerialDriver(base.BaseDriver):
     """Input device that reads bytes from a serial port."""

@@ -66,7 +66,6 @@ class TolerantSocket:
                     self.close("Authentication failed")
         return False
 
-
     def send(self, data):
         if self.socket:
             try:

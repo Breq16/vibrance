@@ -17,7 +17,9 @@ PALETTE = (
 
 ZONES = list(range(6))
 
-api = vibrance.Interface("Broken Pipe") # haha, because it's the pipe input demo, and it's kinda broken...
+# haha, because it's the pipe input demo, and it's kinda broken...
+api = vibrance.Interface("Broken Pipe")
+
 
 @api.on("pipe", "cycle")
 def cycle(event):
@@ -38,6 +40,7 @@ def cycle(event):
     api.color((1, 4), PALETTE[i])
     api.color((0, 1, 3, 4), "000")
 
+
 @api.on("pipe", "chase")
 def chase(event):
     i = event["color"]
@@ -47,9 +50,11 @@ def chase(event):
         api.color([z for z in ZONES if z != zone], "000")
         api.wait(0.1)
 
+
 @api.on("pipe", "clear")
 def clear(event):
     api.color(ZONES, "000")
+
 
 @api.onTelemetry
 def onTelemetry(telemetry):
