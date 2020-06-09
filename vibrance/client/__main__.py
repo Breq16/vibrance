@@ -34,5 +34,4 @@ def stress():
     return render_template("stress.html", host=sys.argv[1])
 
 
-if __name__ == "__main__":
-    app.run("0.0.0.0", port=8080)
+app.run("0.0.0.0", port=8080)
