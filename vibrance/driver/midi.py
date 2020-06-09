@@ -3,19 +3,18 @@ import atexit
 
 import mido
 
-from . import base
+from . import driver
 
 
-class MidiDriver(base.BaseDriver):
-    """Input device that reads messages from a MIDI device."""
+class MidiDriver(driver.Driver):
+    """Driver that reads messages from a virtual MIDI input port. Intended
+    for reading notes on a MIDI track in DAW software such as Ableton.
+
+    On Windows, using this requires external software to create a loopback
+    port.
+    """
 
     def __init__(self, name="", portname="vibrance"):
-        """Creates a MidiInput that receives messages from the given port.
-
-        Linux/MacOS: Creates a virtual input port with the given name.
-
-        Windows: Attempts to connect to a loopback port with the given name.
-        """
         super().__init__(name)
         self.portname = portname
 

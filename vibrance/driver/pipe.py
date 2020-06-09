@@ -1,13 +1,14 @@
 import multiprocessing
 
-from . import base
+from . import driver
 
 
-class PipeDriver(base.BaseDriver):
-    """Input device that reads commands in a separate thread."""
+class PipeDriver(driver.Driver):
+    """Driver that reads input from a separate thread.
 
+    Useful for reading input from event-based systems (e.g. GUI apps).
+    """
     def __init__(self, name="", driver_type="pipe"):
-        """Creates a PipeInput."""
         super().__init__(name)
         self.driver_type = driver_type
 

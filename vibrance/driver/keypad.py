@@ -2,19 +2,18 @@ import curses
 import atexit
 import string
 
-from . import base
+from . import driver
 
 
-class KeypadDriver(base.BaseDriver):
-    """Input device that reads keystrokes from the keyboard in a terminal
-    window. Works on posix (Linux/MacOS) platforms only."""
+class KeypadDriver(driver.Driver):
+    """Driver that reads keystrokes from the keyboard in a terminal
+    window. Works on Linux and macOS only.
+    """
 
     def __init__(self, name=""):
         super().__init__(name)
 
     def _open(self):
-        """Creates a KeypadInput that receives keystrokes from the current
-        window."""
         self.scr = curses.initscr()
         curses.noecho()
         curses.cbreak()
@@ -25,7 +24,6 @@ class KeypadDriver(base.BaseDriver):
         self.scr.refresh()
 
     def _close(self):
-        """Resets the terminal state."""
         self.scr.nodelay(False)
         self.scr.keypad(False)
         curses.nocbreak()

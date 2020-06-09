@@ -2,18 +2,20 @@ import serial
 import serial.tools.list_ports
 import atexit
 
-from . import base
+from . import driver
 
 
 def list_ports():
+    """List the names of all serial ports present on this device."""
     return [port.device for port in serial.tools.list_ports.comports()]
 
 
-class SerialDriver(base.BaseDriver):
-    """Input device that reads bytes from a serial port."""
+class SerialDriver(driver.Driver):
+    """Driver that reads bytes from a serial port.
 
+    Generates events based on individual bytes received.
+    """
     def __init__(self, name="", portname=""):
-        """Creates a SerialInput that reads from the given port."""
         super().__init__(name)
         self.portname = portname
 

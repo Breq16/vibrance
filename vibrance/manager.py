@@ -5,13 +5,13 @@ import importlib.util
 
 from . import controller
 from . import interface
-from .driver import base
+from . import driver
 
 
 class Manager:
     def __init__(self):
         self.ctrl = controller.Controller()
-        self.drivers = {"None": base.BaseDriver("None")}
+        self.drivers = {"None": driver.Driver("None")}
         self.scripts = {"None": interface.Interface("None")}
         self.driver = self.drivers["None"]
         self.script = self.scripts["None"]

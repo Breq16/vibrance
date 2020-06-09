@@ -1,3 +1,3 @@
-from .base import BaseDriver
+from .driver import Driver
 
-__all__ = ["BaseDriver"]
+__all__ = ["Driver"]

@@ -6,6 +6,10 @@ from . import pipe
 
 
 class PyGameDriver(pipe.PipeDriver):
+    """Driver that reads keyboard input captured through a PyGame window.
+
+    Reads both key-up and key-down events.
+    """
     def __init__(self, name=""):
         super().__init__(name, driver_type="pygame")
 
