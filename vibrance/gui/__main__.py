@@ -10,6 +10,7 @@ from .. import manager
 
 app = Flask(__name__)
 
+# Suppress excessive Flask logging to make the console usable by KeypadDriver
 logging.getLogger("werkzeug").setLevel(logging.WARNING)
 
 manager = manager.Manager()

@@ -83,9 +83,10 @@ class TolerantSocket:
         if self.socket:
             try:
                 data = self.socket.recv(length)
-            except (ConnectionError, socket.timeout) as e:
-                self.logger.error("Recv failed: %s", e)
+            except ConnectionError:
                 self.close(f"Connection to {self.host} failed")
+            except socket.timeout:
+                self.close(f"Connection to {self.host} timed out")
             else:
                 if len(data) == 0:
                     self.logger.error("Socket disconnected")
@@ -119,7 +120,8 @@ class TolerantSocket:
                     return data
 
     def close(self, reason=None):
-        self.logger.info("Closing socket")
+        self.logger.info("Closing socket: %s",
+                         (reason if reason is not None else "No errors"))
         if self.socket:
             self.socket.close()
             self.socket = None
