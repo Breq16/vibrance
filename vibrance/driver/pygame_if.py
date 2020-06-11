@@ -27,8 +27,8 @@ class PyGameDriver(pipe.PipeDriver):
         pygame.init()
         color = "000000"
 
-        screen = pygame.display.set_mode((50, 50))
-        pygame.display.set_caption("Vibrance")
+        screen = pygame.display.set_mode((200, 50))
+        pygame.display.set_caption("Vb KEY IN")
         clock = pygame.time.Clock()
 
         running = True

@@ -57,9 +57,12 @@ def status():
     return jsonify(manager.getStatus())
 
 
-tkinter.Tk().withdraw()
-manager.configure(tkinter.filedialog.askdirectory(
-    initialdir=pathlib.Path.home()))
+root = tkinter.Tk()
+root.withdraw()
+configdir = tkinter.filedialog.askdirectory(initialdir=pathlib.Path.home())
+root.destroy()
+
+manager.configure(configdir)
 
 appthread = threading.Thread(target=app.run)
 appthread.start()
