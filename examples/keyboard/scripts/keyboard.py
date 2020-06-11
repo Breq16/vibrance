@@ -19,7 +19,7 @@ PALETTE = (
 
 color = "000000"
 
-api = vibrance.Interface("PyGame Example")
+api = vibrance.Interface("Keyboard Demo")
 
 enabled = {zone: False for zone in range(6)}
 
