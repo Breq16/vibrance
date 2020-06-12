@@ -1,3 +1,4 @@
+import sys
 import threading
 import logging
 import webbrowser
@@ -56,11 +57,13 @@ def relay():
 def status():
     return jsonify(manager.getStatus())
 
-
-root = tkinter.Tk()
-root.withdraw()
-configdir = tkinter.filedialog.askdirectory(initialdir=pathlib.Path.home())
-root.destroy()
+if len(sys.argv) < 2:
+    root = tkinter.Tk()
+    root.withdraw()
+    configdir = tkinter.filedialog.askdirectory(initialdir=pathlib.Path.home())
+    root.destroy()
+else:
+    configdir = sys.argv[1]
 
 manager.configure(configdir)
 
