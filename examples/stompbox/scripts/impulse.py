@@ -15,7 +15,7 @@ PALETTE = (
     "FF0080",  # pink
 )
 
-api = vibrance.Interface("Arduino Example")
+api = vibrance.Interface("Impulse")
 
 
 @api.on("uart", "a")

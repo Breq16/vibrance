@@ -28,7 +28,7 @@ ZONEMAP = (
     (0, 0, 1, 0, 0, 1),  # oct 7
 )
 
-api = vibrance.Interface("Simple MIDI")
+api = vibrance.Interface("16 Colors")
 
 
 @api.on("midi", "note_on")

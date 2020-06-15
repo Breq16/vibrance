@@ -23,7 +23,9 @@ class MidiDriver(driver.Driver):
             self.midi = mido.open_input(self.portname, virtual=True)
         elif os.name == "nt":
             try:
-                self.midi = mido.open_input(f"{self.portname} 3")
+                potential_ports = [port for port in mido.get_input_names()
+                                   if port.split(" ")[0] == self.portname]
+                self.midi = mido.open_input(potential_ports[0])
             except OSError as e:
                 raise OSError("It looks like you're trying to use Vibrance's "
                               "MIDI interface on a Windows device. Vibrance "

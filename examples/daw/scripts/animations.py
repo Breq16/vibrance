@@ -17,7 +17,11 @@ PALETTE = (
 
 ZONES = list(range(6))
 
-api = vibrance.Interface("MIDI Animations")
+api = vibrance.Interface("Octave Animations")
+
+BPM = 122 / 2
+
+BEAT_TIME = 60 / BPM
 
 
 @api.on("midi", "note_on_oct_-2")
@@ -26,15 +30,15 @@ def cycle(event):
 
     api.color((0, 3), PALETTE[i])
     api.color((1, 2, 4, 5), "000")
-    api.wait(0.5)
+    api.wait(BEAT_TIME / 2)
 
     api.color((1, 4), PALETTE[i])
     api.color((0, 2, 3, 5), "000")
-    api.wait(0.5)
+    api.wait(BEAT_TIME / 2)
 
     api.color((2, 5), PALETTE[i])
     api.color((0, 1, 3, 4), "000")
-    api.wait(0.5)
+    api.wait(BEAT_TIME / 2)
 
     api.color((1, 4), PALETTE[i])
     api.color((0, 2, 3, 5), "000")
@@ -46,14 +50,17 @@ def expand(event):
 
     api.add(1, PALETTE[i])
     api.color((0, 2, 3, 4, 5), "000")
-    api.wait(0.5)
+    api.wait(BEAT_TIME / 2)
 
     api.color((0, 2, 4), PALETTE[i])
     api.color((1, 3, 5), "000")
-    api.wait(0.5)
+    api.wait(BEAT_TIME / 2)
 
     api.color((3, 5), PALETTE[i])
     api.color((0, 1, 2, 4), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color((0, 1, 2, 3, 4, 5), "000")
 
 
 @api.on("midi", "note_on_oct_0")
@@ -62,7 +69,7 @@ def chase(event):
     for zone in (2, 1, 0, 3, 4, 5):
         api.color(zone, PALETTE[i])
         api.color([z for z in ZONES if z != zone], "000")
-        api.wait(0.1)
+        api.wait(BEAT_TIME / 3)
 
 
 @api.on("midi", "note_on_oct_1")
@@ -75,7 +82,87 @@ def back_and_forth(event):
         else:
             api.color((3, 4, 5), PALETTE[i])
             api.color((0, 1, 2), "000")
-        api.wait(0.2)
+        api.wait(BEAT_TIME / 4)
+
+
+@api.on("midi", "note_on_oct_2")
+def across_from_front_left(event):
+    i = event["note"] % 12
+
+    api.add(0, PALETTE[i])
+    api.color((1, 2, 3, 4, 5), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color((1, 3), PALETTE[i])
+    api.color((0, 2, 4, 5), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color((2, 4), PALETTE[i])
+    api.color((0, 1, 3, 5), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color(5, PALETTE[i])
+    api.color((0, 1, 2, 3, 4), "000")
+
+
+@api.on("midi", "note_on_oct_3")
+def across_from_front_right(event):
+    i = event["note"] % 12
+
+    api.add(2, PALETTE[i])
+    api.color((1, 0, 3, 4, 5), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color((1, 5), PALETTE[i])
+    api.color((0, 2, 4, 3), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color((0, 4), PALETTE[i])
+    api.color((2, 1, 3, 5), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color(3, PALETTE[i])
+    api.color((0, 1, 2, 5, 4), "000")
+
+
+@api.on("midi", "note_on_oct_4")
+def across_from_back_left(event):
+    i = event["note"] % 12
+
+    api.add(3, PALETTE[i])
+    api.color((1, 2, 0, 4, 5), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color((0, 4), PALETTE[i])
+    api.color((1, 2, 3, 5), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color((1, 5), PALETTE[i])
+    api.color((0, 2, 3, 4), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color(2, PALETTE[i])
+    api.color((0, 1, 5, 3, 4), "000")
+
+
+@api.on("midi", "note_on_oct_5")
+def across_from_back_right(event):
+    i = event["note"] % 12
+
+    api.add(5, PALETTE[i])
+    api.color((1, 0, 3, 4, 2), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color((2, 4), PALETTE[i])
+    api.color((0, 1, 5, 3), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color((1, 3), PALETTE[i])
+    api.color((2, 0, 4, 5), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color(0, PALETTE[i])
+    api.color((3, 1, 2, 5, 4), "000")
 
 
 @api.on("midi", "note_on_127")

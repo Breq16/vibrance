@@ -57,6 +57,7 @@ def relay():
 def status():
     return jsonify(manager.getStatus())
 
+
 if len(sys.argv) < 2:
     root = tkinter.Tk()
     root.withdraw()

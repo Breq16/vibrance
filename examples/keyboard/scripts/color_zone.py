@@ -19,7 +19,7 @@ PALETTE = (
 
 color = "000000"
 
-api = vibrance.Interface("Keyboard Demo")
+api = vibrance.Interface("Color + Zone")
 
 enabled = {zone: False for zone in range(6)}
 
