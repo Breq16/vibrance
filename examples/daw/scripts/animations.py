@@ -28,10 +28,6 @@ BEAT_TIME = 60 / BPM
 def cycle(event):
     i = event["note"] % 12
 
-    api.color((0, 3), PALETTE[i])
-    api.color((1, 2, 4, 5), "000")
-    api.wait(BEAT_TIME / 2)
-
     api.color((1, 4), PALETTE[i])
     api.color((0, 2, 3, 5), "000")
     api.wait(BEAT_TIME / 2)
@@ -42,13 +38,17 @@ def cycle(event):
 
     api.color((1, 4), PALETTE[i])
     api.color((0, 2, 3, 5), "000")
+    api.wait(BEAT_TIME / 2)
+
+    api.color((0, 3), PALETTE[i])
+    api.color((1, 2, 4, 5), "000")
 
 
 @api.on("midi", "note_on_oct_-1")
 def expand(event):
     i = event["note"] % 12
 
-    api.add(1, PALETTE[i])
+    api.color(1, PALETTE[i])
     api.color((0, 2, 3, 4, 5), "000")
     api.wait(BEAT_TIME / 2)
 
@@ -66,7 +66,7 @@ def expand(event):
 @api.on("midi", "note_on_oct_0")
 def chase(event):
     i = event["note"] % 12
-    for zone in (2, 1, 0, 3, 4, 5):
+    for zone in (1, 0, 3, 4, 5, 2):
         api.color(zone, PALETTE[i])
         api.color([z for z in ZONES if z != zone], "000")
         api.wait(BEAT_TIME / 3)
@@ -89,7 +89,7 @@ def back_and_forth(event):
 def across_from_front_left(event):
     i = event["note"] % 12
 
-    api.add(0, PALETTE[i])
+    api.color(0, PALETTE[i])
     api.color((1, 2, 3, 4, 5), "000")
     api.wait(BEAT_TIME / 2)
 
@@ -109,7 +109,7 @@ def across_from_front_left(event):
 def across_from_front_right(event):
     i = event["note"] % 12
 
-    api.add(2, PALETTE[i])
+    api.color(2, PALETTE[i])
     api.color((1, 0, 3, 4, 5), "000")
     api.wait(BEAT_TIME / 2)
 
@@ -129,7 +129,7 @@ def across_from_front_right(event):
 def across_from_back_left(event):
     i = event["note"] % 12
 
-    api.add(3, PALETTE[i])
+    api.color(3, PALETTE[i])
     api.color((1, 2, 0, 4, 5), "000")
     api.wait(BEAT_TIME / 2)
 
@@ -149,7 +149,7 @@ def across_from_back_left(event):
 def across_from_back_right(event):
     i = event["note"] % 12
 
-    api.add(5, PALETTE[i])
+    api.color(5, PALETTE[i])
     api.color((1, 0, 3, 4, 2), "000")
     api.wait(BEAT_TIME / 2)
 
@@ -163,6 +163,52 @@ def across_from_back_right(event):
 
     api.color(0, PALETTE[i])
     api.color((3, 1, 2, 5, 4), "000")
+
+
+@api.on("midi", "note_on_oct_6")
+def flash(event):
+    i = event["note"] % 12
+
+    api.color(range(6), PALETTE[i])
+    api.wait(BEAT_TIME / 2)
+
+    api.color(range(6), "000")
+
+
+@api.on("midi", "note_on_oct_7")
+def loop(event):
+    i = event["note"] % 12
+
+    api.color(4, PALETTE[i])
+    api.color((0, 1, 2, 3, 5), "000")
+    api.wait(BEAT_TIME / 4)
+
+    api.color(1, PALETTE[i])
+    api.color((0, 4, 2, 3, 5), "000")
+    api.wait(BEAT_TIME / 4)
+
+    api.color(0, PALETTE[i])
+    api.color((4, 1, 2, 3, 5), "000")
+    api.wait(BEAT_TIME / 4)
+
+    api.color(3, PALETTE[i])
+    api.color((0, 1, 2, 4, 5), "000")
+    api.wait(BEAT_TIME / 4)
+
+    api.color(4, PALETTE[i])
+    api.color((0, 1, 2, 3, 5), "000")
+    api.wait(BEAT_TIME / 4)
+
+    api.color(1, PALETTE[i])
+    api.color((0, 4, 2, 3, 5), "000")
+    api.wait(BEAT_TIME / 4)
+
+    api.color(2, PALETTE[i])
+    api.color((0, 1, 4, 3, 5), "000")
+    api.wait(BEAT_TIME / 4)
+
+    api.color(5, PALETTE[i])
+    api.color((0, 1, 2, 3, 4), "000")
 
 
 @api.on("midi", "note_on_127")

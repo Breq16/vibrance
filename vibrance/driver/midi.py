@@ -24,7 +24,8 @@ class MidiDriver(driver.Driver):
         elif os.name == "nt":
             try:
                 potential_ports = [port for port in mido.get_input_names()
-                                   if port.split(" ")[0] == self.portname]
+                                   if " ".join(port.split(" ")[:-1])
+                                   == self.portname]
                 self.midi = mido.open_input(potential_ports[0])
             except OSError as e:
                 raise OSError("It looks like you're trying to use Vibrance's "

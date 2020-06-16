@@ -7,7 +7,7 @@ setuptools.setup(
     name="vibrance",
     version="0.1.0",
     author="Wesley Chalmers",
-    author_email="wesleyjchalmers@gmail.com",
+    author_email="breq@breq.dev",
     description="Crowd-based concert lighting system",
     long_description=long_description,
     long_description_content_type="text/markdown",
