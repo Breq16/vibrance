@@ -23,6 +23,9 @@ CYCLE_KEYS = ("q", "w", "e", "r", "t", "y", "u")
 CHASE_KEYS = ("a", "s", "d", "f", "g", "h", "j")
 EXPAND_KEYS = ("z", "x", "c", "v", "b", "n", "m")
 
+BPM = 122 / 2
+
+BEAT_TIME = 60 / BPM
 
 @api.on("pygame", "keydown")
 def keydown(event):
@@ -43,38 +46,41 @@ def keydown(event):
 def cycle(i):
     api.color((0, 3), PALETTE[i])
     api.color((1, 2, 4, 5), "000")
-    api.wait(0.5)
+    api.wait(BEAT_TIME / 8)
 
     api.color((1, 4), PALETTE[i])
     api.color((0, 2, 3, 5), "000")
-    api.wait(0.5)
+    api.wait(BEAT_TIME / 8)
 
     api.color((2, 5), PALETTE[i])
     api.color((0, 1, 3, 4), "000")
-    api.wait(0.5)
+    api.wait(BEAT_TIME / 8)
 
     api.color((1, 4), PALETTE[i])
     api.color((0, 2, 3, 5), "000")
 
 
 def expand(i):
-    api.add(1, PALETTE[i])
+    api.color(1, PALETTE[i])
     api.color((0, 2, 3, 4, 5), "000")
-    api.wait(0.5)
+    api.wait(BEAT_TIME / 8)
 
     api.color((0, 2, 4), PALETTE[i])
     api.color((1, 3, 5), "000")
-    api.wait(0.5)
+    api.wait(BEAT_TIME / 8)
 
     api.color((3, 5), PALETTE[i])
     api.color((0, 1, 2, 4), "000")
+    api.wait(BEAT_TIME / 8)
+
+    api.color((0, 1, 2, 3, 4, 5), "000")
 
 
 def chase(i):
     for zone in (2, 1, 0, 3, 4, 5):
         api.color(zone, PALETTE[i])
         api.color([z for z in ZONES if z != zone], "000")
-        api.wait(0.1)
+        api.wait(BEAT_TIME / 12)
 
 
 def clear():

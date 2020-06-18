@@ -34,7 +34,7 @@ class TolerantSocket:
 
         try:
             self.socket.connect((self.host, self.port))
-        except ConnectionError:
+        except OSError:  # ConnectionError:
             self.close(f"Connection to {self.host} failed")
         except socket.timeout:
             self.close(f"Connection to {self.host} timed out")
